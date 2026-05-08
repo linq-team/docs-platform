@@ -47,3 +47,8 @@ publicHoistPattern:
   - 'astro-expressive-code'
 
 dedupePeers: true
+
+allowBuilds:
+  '@parcel/watcher': false
+  esbuild: false
+  sharp: false

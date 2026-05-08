@@ -2,6 +2,11 @@
   "name": "@stainless-api/ui-primitives",
   "version": "1.0.0-beta.54",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stainless/docs-platform.git",
+    "directory": "packages/ui-primitives"
+  },
   "publishConfig": {
     "access": "public"
   },

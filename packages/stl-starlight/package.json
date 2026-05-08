@@ -40,7 +40,12 @@
   "keywords": [],
   "author": "",
   "license": "MIT",
-  "packageManager": "pnpm@10.33.4",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stainless/docs-platform.git",
+    "directory": "packages/stl-starlight"
+  },
+  "packageManager": "pnpm@11.0.8",
   "engines": {
     "node": ">=22.12.0"
   },

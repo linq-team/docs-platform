@@ -3,6 +3,11 @@
   "private": false,
   "version": "1.0.0-beta.96",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stainless/docs-platform.git",
+    "directory": "packages/docs-ui"
+  },
   "publishConfig": {
     "access": "public"
   },
