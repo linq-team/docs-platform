@@ -1,0 +1,4 @@
+import { defineConfig } from 'eslint/config';
+import { config } from '@stainless/eslint-config/astro';
+
+export default defineConfig(config);

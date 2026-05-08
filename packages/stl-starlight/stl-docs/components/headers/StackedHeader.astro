@@ -1,0 +1,32 @@
+---
+import LanguageSelect from 'virtual:starlight/components/LanguageSelect';
+import Search from 'virtual:starlight/components/Search';
+import SiteTitle from 'virtual:starlight/components/SiteTitle';
+import HeaderLinks from './HeaderLinks.astro';
+import ThemeSelect from 'virtual:starlight/components/ThemeSelect';
+import SecondaryNavTabs from '../nav-tabs/SecondaryNavTabs.astro';
+
+type Props = {
+  shouldRenderSearch?: boolean;
+};
+
+const { shouldRenderSearch } = Astro.props;
+---
+
+<div class="header">
+  <div class="left-group">
+    <div class="title-wrapper sl-flex">
+      <SiteTitle />
+    </div>
+  </div>
+
+  {shouldRenderSearch && <Search />}
+
+  <div class="right-group">
+    <ThemeSelect />
+    <HeaderLinks />
+    <LanguageSelect />
+  </div>
+</div>
+
+<SecondaryNavTabs />

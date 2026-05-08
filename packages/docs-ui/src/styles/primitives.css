@@ -1,0 +1,578 @@
+/* Design System Defaults */
+.stldocs-root {
+  font-family: var(--stl-typography-font);
+  color: var(--stl-color-foreground);
+  letter-spacing: -0.01em;
+
+  :where(h1) {
+    font-size: var(--stl-typography-text-h1);
+    letter-spacing: -0.03em;
+  }
+
+  :where(h2) {
+    font-size: var(--stl-typography-text-h2);
+    letter-spacing: -0.03em;
+  }
+
+  :where(h3) {
+    font-size: var(--stl-typography-text-h3);
+    letter-spacing: -0.02em;
+  }
+
+  :where(h4) {
+    font-size: var(--stl-typography-text-h4);
+    letter-spacing: -0.02em;
+  }
+
+  :where(h5) {
+    font-size: var(--stl-typography-text-h5);
+    letter-spacing: -0.02em;
+  }
+}
+
+/* Color mapping for types */
+.stldocs-root {
+  .stldocs-text-keyword {
+    color: var(--stl-color-foreground-muted);
+  }
+
+  .stldocs-property-type,
+  .stldocs-property-declaration,
+  .stldocs-type:not(.stldocs-property-typename .stldocs-type) {
+    font-family: var(--stl-typography-font-mono);
+
+    .stldocs-type-keyword {
+      color: var(--stldocs-syntax-color-orange);
+    }
+
+    .stldocs-type-string {
+      color: var(--stldocs-syntax-color-green);
+    }
+
+    .stldocs-type-brace,
+    .stldocs-type-bracket,
+    .stldocs-type-plain,
+    .stldocs-text-operator,
+    .stldocs-text-punctuation,
+    .stldocs-truncation,
+    .stldocs-type-array {
+      color: var(--stl-color-foreground-reduced);
+    }
+
+    .stldocs-type-plain {
+      font-family: var(--stl-typography-font);
+    }
+
+    .stldocs-type-reference {
+      color: var(--stldocs-syntax-color-blue);
+      font-weight: 600;
+      a:hover {
+        text-decoration: underline;
+      }
+    }
+
+    .stldocs-literal-string {
+      color: var(--stldocs-syntax-color-green);
+    }
+
+    .stldocs-literal-numeric {
+      color: var(--stldocs-syntax-color-orange);
+    }
+
+    .stldocs-text-identifier {
+      font-family: var(--stl-typography-font-mono);
+      color: var(--stl-color-foreground);
+    }
+
+    .stldocs-type-propertyname .stldocs-text-identifier {
+      font-family: var(--stl-typography-font);
+      font-weight: 600;
+    }
+  }
+
+  [data-stldocs-language='http'],
+  [data-stldocs-language='cli'] {
+    .stldocs-property-type,
+    .stldocs-property-declaration {
+      .stldocs-truncation,
+      .stldocs-type-array,
+      .stldocs-text-punctuation {
+        font-family: var(--stl-typography-font);
+      }
+    }
+  }
+}
+
+/* HTTP Method Color Settings */
+.stldocs-root .stldocs-method-route,
+.stldocs-root .stldocs-sidebar-method {
+  [data-method='get'] {
+    background: var(--stldocs-color-http-get-bg);
+    color: var(--stldocs-color-http-get);
+    border-color: var(--stldocs-color-http-get);
+  }
+
+  [data-method='post'] {
+    background: var(--stldocs-color-http-post-bg);
+    color: var(--stldocs-color-http-post);
+    border-color: var(--stldocs-color-http-post);
+  }
+
+  [data-method='patch'],
+  [data-method='put'] {
+    background: var(--stldocs-color-http-put-bg);
+    color: var(--stldocs-color-http-put);
+    border-color: var(--stldocs-color-http-put);
+  }
+
+  [data-method='delete'] {
+    background: var(--stldocs-color-http-delete-bg);
+    color: var(--stldocs-color-http-delete);
+    border-color: var(--stldocs-color-http-delete);
+  }
+}
+
+/* Generic expand/collapse button */
+.stldocs-root .stldocs-expander {
+  &[data-stldocs-expander-muted='true'] {
+    .stldocs-expander-summary-icon {
+      visibility: hidden;
+    }
+
+    &:hover .stldocs-expander-summary-icon {
+      visibility: visible;
+    }
+  }
+
+  .stldocs-expander-summary {
+    cursor: pointer;
+    display: flex;
+
+    & > .stldocs-expander-summary-icon {
+      margin-right: 8px;
+      transform: translateX(-0.5px) translateY(-0.5px);
+
+      & > .stldocs-icon {
+        vertical-align: middle;
+        color: var(--stl-color-foreground-muted);
+        background-color: var(--stl-color-background);
+      }
+
+      & > :last-child {
+        display: none;
+      }
+    }
+  }
+
+  /* This prefix is used as a dummy word before object type previews, specifically in HTTP.
+   *
+   * In a lot of cases, we don't want to see this word (e.g. if the rest of the type
+   * preview can be shown). Thus, the default case is to hide it (below).
+   *
+   * However, there are two other cases where we do want it to display, which are:
+   * 1. Unions:  We need to display something here, and the regular type preview is
+   *    hidden for objects in unions.
+   *
+   * 2. Expanded objects w/out identifier: If an object is expanded and doesn't
+   *    have an identifer, we don't have anything to show. Thus, we put the dummy
+   *    word there to enable it.
+   *
+   * See below for both of these special case selectors.
+   * */
+  .stldocs-type-preview-prefix {
+    display: none;
+  }
+
+  /* We want to show the prefix in unions, see above comment */
+  &
+    > .stldocs-expander-summary
+    .stldocs-type-preview[data-stldocs-type-preview='union']
+    .stldocs-type-preview-prefix {
+    display: inline;
+  }
+
+  &[open],
+  &[data-open='true'] {
+    & > .stldocs-expander-summary {
+      .stldocs-type-preview[data-stldocs-type-preview='properties']
+        :is(.stldocs-type-preview-content, .stldocs-type-brace) {
+        display: none;
+      }
+
+      & > .stldocs-expander-summary-icon {
+        & > :first-child {
+          display: none;
+        }
+
+        & > :last-child {
+          display: inline;
+        }
+      }
+
+      /* We want to show the prefix in expanded objects with no identifier, see above comment */
+      &:not(:has(.stldocs-property-declaration > .stldocs-text-identifier)) {
+        .stldocs-type-preview-prefix {
+          display: inline;
+        }
+      }
+    }
+
+    & > .stldocs-expander-content {
+      line-height: 150%;
+
+      & > .stldocs-property-children {
+        border-left: 1px solid var(--stl-color-border);
+        padding-left: 16px;
+
+        .stldocs-expander {
+          margin-left: calc(-1 * var(--stldocs-expander-margin-shift));
+          padding-right: var(--stldocs-expander-right-margin);
+        }
+        /* move margin to .stldocs-property parent where possible to fix safari subgrid bug */
+        .stldocs-property:has(> .stldocs-expander) {
+          margin-left: calc(-1 * var(--stldocs-expander-margin-shift));
+          & > .stldocs-expander {
+            margin-left: 0;
+          }
+        }
+      }
+    }
+  }
+
+  /* makes a big perf difference in browser calculating layout, even though the UA should do this? */
+  /* not using display: none so that the user can still Cmd+F for the contents */
+  &:not([open], [data-open='true']) .stldocs-expander-content {
+    position: absolute;
+    clip-path: inset(100%);
+    contain: layout;
+  }
+}
+
+/* Markdown content */
+.stldocs-root .stldocs-content {
+  a {
+    color: var(--stl-color-link-foreground);
+  }
+
+  strong {
+    font-weight: bold;
+  }
+
+  em {
+    font-style: italic;
+  }
+
+  p {
+    display: block;
+    margin: 0 0 1em;
+
+    &:last-child {
+      margin: 0;
+    }
+  }
+
+  li {
+    margin-bottom: 0.25rem;
+    display: list-item;
+  }
+
+  ol,
+  ul {
+    display: block;
+    list-style-type: initial;
+    margin-left: 2rem;
+    margin-bottom: 0.8rem;
+  }
+
+  ol {
+    list-style-type: decimal;
+  }
+
+  hr {
+    margin-bottom: 16px;
+    border: none;
+    border-bottom: 1px solid var(--stl-color-border);
+  }
+}
+
+.stldocs-root .stldocs-content code:not(pre code),
+.stldocs-root .stldocs-property-constraint .stldocs-property-constraint-value {
+  font-family: var(--stl-typography-font-mono);
+  border-radius: 4px;
+  padding: 0 4px;
+  background-color: var(--stldocs-color-bg-inline-code);
+  word-break: break-all;
+  font-size: 0.84rem;
+}
+
+.stldocs-root .stldocs-input {
+  border: 1px solid var(--stl-color-border);
+  background: var(--stl-color-background);
+  border-radius: var(--stl-ui-layout-border-radius-sml);
+  display: flex;
+
+  &:focus-within {
+    border-color: var(--stl-color-accent);
+  }
+
+  &.stldocs-input-disabled {
+    opacity: 0.5;
+  }
+
+  input,
+  .stldocs-masked-input-display {
+    flex-grow: 1;
+    border: none;
+    background-color: transparent;
+    margin: 0.5rem;
+    font-size: 1rem;
+    letter-spacing: initial;
+    white-space: pre;
+    contain: content;
+    padding: 0;
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  .stldocs-masked-input-wrapper {
+    &:focus-within .stldocs-masked-input-display,
+    &:not(:focus-within) input {
+      opacity: 0;
+    }
+  }
+
+  .stldocs-masked-input-obscured {
+    -webkit-text-stroke: currentColor 0.2em;
+  }
+
+  .stldocs-icon {
+    margin: auto 0.25rem auto 0.75rem;
+  }
+}
+
+.stldocs-root .stldocs-masked-input-wrapper {
+  display: flex;
+  flex-grow: 1;
+  position: relative;
+  font-family: var(--stl-typography-font-mono);
+}
+
+.stldocs-root .stldocs-masked-input-display {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  pointer-events: none; /* so you can click through to the real input */
+}
+
+.stldocs-root .stldocs-listview {
+  overflow-y: scroll;
+
+  .stldocs-listview-item:not(:last-child) {
+    border-bottom: 1px solid var(--stl-color-border);
+  }
+
+  [data-stldocs-listview-selected='true'] > :first-child {
+    background:
+      linear-gradient(var(--stl-color-ui-background-hover), var(--stl-color-ui-background-hover)),
+      linear-gradient(var(--stl-color-ui-background), var(--stl-color-ui-background));
+    border-radius: 0.5rem;
+  }
+}
+
+.stldocs-root {
+  .stldocs-tooltip-host {
+    display: inline-block;
+  }
+
+  .stldocs-tooltip-content {
+    border: 1px solid var(--stl-color-border);
+    background: var(--stl-color-background);
+    border-radius: 8px;
+    padding: 0.2rem 0.4rem;
+
+    * {
+      font-size: 0.8rem !important;
+    }
+
+    position: absolute;
+
+    transition:
+      opacity 0.3s ease-in-out,
+      visibility 0.3s step-end 0.3s;
+    visibility: hidden;
+    opacity: 0;
+
+    max-width: 400px;
+    max-height: 300px;
+    overflow: auto;
+
+    .stldocs-property-description {
+      display: none;
+    }
+  }
+
+  .stldocs-tooltip:hover .stldocs-tooltip-content {
+    transition-delay: 0s, 0s;
+    visibility: visible;
+    opacity: 1;
+  }
+}
+
+.stldocs-root {
+  .stldocs-breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    svg {
+      width: 1rem;
+      min-width: 1rem;
+      stroke: var(--stl-color-foreground-reduced);
+      opacity: 0.25;
+      margin: 0;
+    }
+
+    .stldocs-breadcrumbs-non-link,
+    .stldocs-breadcrumbs-link {
+      color: var(--stl-color-foreground-reduced);
+      font-size: var(--stl-typography-scale-sm);
+      line-height: 150%;
+      text-decoration: none;
+    }
+
+    .stldocs-breadcrumbs-link:hover {
+      text-decoration: underline;
+      color: var(--stl-color-foreground);
+    }
+
+    .stldocs-breadcrumbs-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0;
+    }
+  }
+}
+
+.stldocs-root .stldocs-expand-toggle {
+  font-size: var(--stl-typography-scale-sm);
+  display: flex;
+  flex-grow: 1;
+  justify-content: flex-end;
+  user-select: none;
+
+  &[data-stldocs-property-toggle-expanded='false'] {
+    .stldocs-expand-toggle-content:last-child {
+      display: none;
+    }
+  }
+
+  &[data-stldocs-property-toggle-expanded='true'] {
+    .stldocs-expand-toggle-content:first-child {
+      display: none;
+    }
+  }
+
+  .stldocs-expand-toggle-content {
+    cursor: pointer;
+
+    .stldocs-icon {
+      vertical-align: middle;
+    }
+  }
+}
+
+/* Deeplink button */
+
+/* Link is not inside <summary> because interactive content in <summary> considered harmful
+ * Subgrid must be applied from the top-level .stldocs-property all the way down to where the
+ * inline summary content is rendered, so that the link button can be positioned at the “end” of
+ * the summary line without actually shrinking the <details> or summary element.
+ */
+.stldocs-root .stldocs-property:has(.stldocs-deep-link-button) {
+  display: grid;
+  /* expander  |  summary content  |  deeplink */
+  grid-template-columns: auto minmax(0, max-content) 1fr;
+  grid-template-rows: auto auto;
+  gap: 0;
+  width: 100%;
+
+  /* expander child */
+  & > .stldocs-expander {
+    grid-column: 1 / -1;
+    grid-row: 1 / -1;
+
+    display: grid;
+    grid-template-columns: subgrid;
+    grid-template-rows: subgrid;
+
+    & > .stldocs-expander-summary {
+      grid-column: 1 / -1;
+      grid-row: 1;
+      display: grid;
+      grid-template-columns: subgrid;
+      grid-template-rows: subgrid;
+      & > .stldocs-expander-summary-icon {
+        grid-column: 1;
+      }
+      & > .stldocs-expander-summary-content {
+        grid-column: 2;
+      }
+    }
+
+    &::details-content,
+    & > .stldocs-expander-content {
+      grid-row: 2;
+      grid-column: 2 / -1;
+    }
+  }
+
+  /* non-expanding child */
+  & > .stldocs-property-info {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  & > .stldocs-deep-link-button {
+    grid-column: span 1 / -1;
+    grid-row: 1;
+    align-self: center;
+    justify-self: start;
+    margin-left: 0.25em;
+    display: none;
+    margin-top: -1rem;
+    margin-bottom: -1rem;
+    animation: stldocs-deep-link-delay-enter 0.2s ease-out;
+    animation-delay: 0.3s;
+    animation-fill-mode: both;
+
+    svg {
+      width: 1em;
+      height: 1em;
+    }
+  }
+
+  /* show link button when expander summary is hovered */
+  & > .stldocs-expander:has(> .stldocs-expander-summary:hover) + .stldocs-deep-link-button,
+  /* show link button when non-expander rows are hovered */
+  &:not(:has(> .stldocs-expander)):hover > .stldocs-deep-link-button,
+  /* keep it visible when it itself is hovered or focused */
+  & > .stldocs-deep-link-button:is(:hover, :focus) {
+    display: flex;
+  }
+}
+
+@keyframes stldocs-deep-link-delay-enter {
+  from {
+    display: none;
+    opacity: 0;
+    scale: 0.85;
+  }
+  to {
+    opacity: 1;
+    scale: 0.99;
+  }
+}

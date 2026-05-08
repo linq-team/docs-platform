@@ -1,0 +1,70 @@
+{
+  "name": "@stainless-api/docs-search",
+  "version": "1.0.0-beta.50",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "clean": "rm -rf dist",
+    "lint": "eslint --flag unstable_native_nodejs_ts_config .",
+    "check:types": "tsc --noEmit",
+    "prepack": "npm run clean && TURBO_UI=0 turbo build && cp package.json package.json.bak && node --experimental-strip-types ../../scripts/remove-development-condition-prepack.ts",
+    "postpack": "mv package.json.bak package.json"
+  },
+  "peerDependencies": {
+    "react": ">=19.0.0",
+    "react-dom": ">=19.0.0"
+  },
+  "dependencies": {
+    "@algolia/client-search": "^5.52.0",
+    "@markdoc/markdoc": "^0.5.7",
+    "@stainless-api/docs-ui": "workspace:*",
+    "@stainless-api/ui-primitives": "workspace:*",
+    "fuse.js": "^7.3.0",
+    "lucide-react": "catalog:"
+  },
+  "devDependencies": {
+    "@stainless/eslint-config": "workspace:*",
+    "@stainless/sdk-json": "latest",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "dotenv": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "tsdown": "catalog:",
+    "typescript": "catalog:"
+  },
+  "exports": {
+    ".": {
+      "development": "./src/index.tsx",
+      "default": "./dist/index.js"
+    },
+    "./indexer": {
+      "development": "./src/indexer.ts",
+      "default": "./dist/indexer.js"
+    },
+    "./context": {
+      "development": "./src/context.tsx",
+      "default": "./dist/context.js"
+    },
+    "./mcp": {
+      "development": "./src/mcp.ts",
+      "default": "./dist/mcp.js"
+    },
+    "./types": {
+      "development": "./src/types.ts",
+      "default": "./dist/types.js"
+    },
+    "./providers/*": {
+      "development": "./src/providers/*.ts",
+      "default": "./dist/providers/*.js"
+    }
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig.json",
+  // Improve default TS types for all files.
+  "files": ["reset.d.ts"],
+  "compilerOptions": {
+    "target": "ES2024",
+    "lib": ["DOM", "DOM.Iterable", "ES2024"],
+
+    // module resolution
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "allowArbitraryExtensions": true,
+    "rewriteRelativeImportExtensions": true,
+
+    // strictness
+    "noImplicitOverride": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+
+    "allowJs": true,
+
+    "jsx": "preserve",
+
+    "sourceMap": true,
+    "noEmit": true,
+    "incremental": true,
+
+    "customConditions": ["development"],
+
+    "plugins": [{ "name": "typescript-plugin-css-modules" }]
+  }
+}

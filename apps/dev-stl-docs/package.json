@@ -1,0 +1,28 @@
+{
+  "name": "dev-stl-docs",
+  "type": "module",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "sync": "astro sync",
+    "lint": "eslint --flag unstable_native_nodejs_ts_config . --max-warnings 0",
+    "check:types": "astro check"
+  },
+  "dependencies": {
+    "@astrojs/react": "catalog:",
+    "@astrojs/starlight": "catalog:",
+    "@stainless-api/docs": "workspace:*",
+    "@stainless/sdk-json": "latest",
+    "astro": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "devDependencies": {
+    "@astrojs/check": "catalog:",
+    "@stainless/eslint-config": "workspace:*",
+    "typescript": "catalog:"
+  }
+}

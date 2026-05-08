@@ -1,0 +1,1 @@
+export { FunctionIcon } from './Function';

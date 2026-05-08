@@ -1,0 +1,140 @@
+@use 'sass:meta';
+@use 'sass:list';
+
+// Multiplies a CSS variable by an alpha value to obtain a new value.
+// Supports separate alpha values for light/dark mode, and abstracts away the fact that light-dark()
+// only accepts fully qualified <color> values to reduce repetition.
+@function multiply-alpha($from-color, $alpha) {
+  @if meta.type-of($alpha) != 'list' {
+    // note we want to multiply the base color with our new $alpha, like if users set a
+    // semi-transparent base color we don’t want to make it more opaque for the `reduced`
+    @return rgb(from var(#{$from-color}) r g b / calc(alpha * #{$alpha}));
+  } @else {
+    // If a list of two values are passed as $alpha, interpret them as light-dark() values
+    @return light-dark(
+      rgb(from var(#{$from-color}) r g b / calc(alpha * #{list.nth($alpha, 1)})),
+      rgb(from var(#{$from-color}) r g b / calc(alpha * #{list.nth($alpha, 2)}))
+    );
+  }
+}
+
+/* 1. Base colors */
+
+// prettier-ignore
+@layer stl-ui.tokens {
+  :root {
+    --stl-opacity-level-080: 0.80;
+    --stl-opacity-level-040: 0.40;
+    --stl-opacity-level-016: 0.16;
+    --stl-opacity-level-008: 0.08;
+    --stl-opacity-level-004: 0.04;
+
+    /* background */
+    --stl-color-background: light-dark(rgb(255 255 255), rgb(10 10 10));
+    --stl-color-background-hover: #{multiply-alpha(--stl-color-foreground, (var(--stl-opacity-level-004), var(--stl-opacity-level-008)))};
+    /* background shades */
+    /* muted background */
+    --stl-color-muted-background: #{multiply-alpha(--stl-color-foreground, (var(--stl-opacity-level-008), var(--stl-opacity-level-016)))};
+    --stl-color-muted-background-hover: #{multiply-alpha(--stl-color-muted-background, 2)}; // 0.16 / 0.32
+    /* faint background */
+    --stl-color-faint-background: #{multiply-alpha(--stl-color-foreground, var(--stl-opacity-level-004))};
+    --stl-color-faint-background-hover: #{multiply-alpha(--stl-color-faint-background, 2)}; // 0.08 / 0.16
+    /* ui elements like cards and buttons match --stl-color-background in light mode, but have a slight tint in dark mode */
+    --stl-color-ui-background: light-dark(
+      var(--stl-color-background),
+      #{multiply-alpha(--stl-color-foreground, var(--stl-opacity-level-004))}
+    );
+    --stl-color-ui-background-hover: light-dark(
+      var(--stl-color-background-hover),
+      #{multiply-alpha(--stl-color-ui-background, 2)}
+    );
+
+    /* foreground */
+    --stl-color-foreground: light-dark(rgb(38 38 38), rgb(245 245 245));
+    --stl-color-foreground-reduced: #{multiply-alpha(--stl-color-foreground, var(--stl-opacity-level-080))};
+    --stl-color-foreground-muted: #{multiply-alpha(--stl-color-foreground, var(--stl-opacity-level-040))};
+
+    /* inverse */
+    --stl-color-inverse-background: var(--stl-color-foreground);
+    --stl-color-inverse-background-hover: #{multiply-alpha(--stl-color-inverse-background, 0.9)};
+    --stl-color-inverse-foreground: var(--stl-color-background);
+
+    /* default border (“foreground border”) */
+    --stl-color-border: #{multiply-alpha(--stl-color-foreground, var(--stl-opacity-level-016))};
+    --stl-color-border-faint: #{multiply-alpha(--stl-color-border, 0.5)}; // 0.08
+    --stl-color-border-strong: #{multiply-alpha(--stl-color-border, 2.5)}; // 0.40
+  }
+}
+
+/* 2. Color palettes (accent, red, green, etc) */
+
+// prettier-ignore
+@mixin palette(
+  $name,
+  $base-color,
+  $inverse-color,
+) {
+  // adds an output comment with the name of the palette to delineate sections in the output CSS
+  /* #{$name} */
+  $base-var: '--stl-color-#{$name}';
+  #{$base-var}: $base-color;
+
+  // in this mixin the [name]-foreground (text color) and [name]-inverse-background (background
+  // color) both come from the base color.
+  // we expect that users might override them separately when it’s necessary for contrast
+
+  // text colors
+  #{$base-var}-foreground: var(#{$base-var}); // color text on a plain background
+  #{$base-var}-foreground-reduced: #{multiply-alpha(#{$base-var}-foreground, var(--stl-opacity-level-080))};
+  #{$base-var}-foreground-muted: #{multiply-alpha(#{$base-var}-foreground, var(--stl-opacity-level-040))};
+
+  // muted-background
+  #{$base-var}-muted-background: #{multiply-alpha(#{$base-var}-foreground, (var(--stl-opacity-level-008), var(--stl-opacity-level-016)))};
+  #{$base-var}-muted-background-hover: #{multiply-alpha(#{$base-var}-muted-background, 2)}; // 0.16 / 0.32
+
+  // border colors
+  #{$base-var}-border: #{multiply-alpha($base-var, (var(--stl-opacity-level-016), calc(var(--stl-opacity-level-016) * 1.5)))}; // 0.16 / 0.24
+  #{$base-var}-border-faint: #{multiply-alpha(#{$base-var}-border, 0.5)}; // 0.08 / 0.12
+  #{$base-var}-border-strong: var(#{$base-var});
+
+  // inverse (e.g. buttons)
+  #{$base-var}-inverse-background: var(#{$base-var}); // color background
+  #{$base-var}-inverse-background-hover: #{multiply-alpha(#{$base-var}-inverse-background, var(--stl-opacity-level-080))};
+  #{$base-var}-inverse-foreground: $inverse-color; // plain text on a color background
+}
+
+@layer stl-ui.tokens {
+  :root {
+    @include palette('accent', light-dark(#155dfc, #2b7fff), rgb(255 255 255));
+    @include palette('red', light-dark(#d01e22, #e34041), rgb(255 255 255));
+    @include palette('green', light-dark(#16a34a, #22c55e), rgb(255 255 255));
+    @include palette('blue', light-dark(#155dfc, #2b7fff), rgb(255 255 255));
+    @include palette('yellow', light-dark(#ca8a04, #eab308), rgb(255 255 255));
+    @include palette('orange', light-dark(#ea580c, #f97316), rgb(255 255 255));
+    @include palette('purple', light-dark(#9333ea, #a855f7), rgb(255 255 255));
+    @include palette('cyan', light-dark(#0891b2, #06b6d4), rgb(255 255 255));
+    @include palette('pink', light-dark(#ec4899, #ec4899), rgb(255 255 255));
+  }
+
+  :root[data-theme='dark'],
+  .stl-theme-dark {
+    color-scheme: dark;
+    background: var(--stl-color-background);
+    color: var(--stl-color-foreground);
+  }
+
+  :root[data-theme='light'],
+  .stl-theme-light {
+    color-scheme: light;
+    background: var(--stl-color-background);
+    color: var(--stl-color-foreground);
+  }
+}
+
+/* Semantic color roles */
+@layer stl-ui.tokens {
+  :root {
+    --stl-color-link-foreground: var(--stl-color-accent-foreground);
+    --stl-color-text-selection: var(--stl-color-accent-inverse-background);
+  }
+}

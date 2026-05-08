@@ -1,0 +1,51 @@
+.page > .sidebar > .sidebar-pane {
+  padding-inline-end: 1rem;
+  border-inline-end: 1px solid var(--stl-color-border-faint);
+  padding-block-end: calc(2rem + env(safe-area-inset-bottom));
+
+  /* make sure the sidebar doesn’t get clipped on the left by overflow */
+  margin-inline-start: calc(-1 * var(--stl-page-gutter-left));
+  padding-inline-start: var(--stl-page-gutter-left);
+
+  background-color: var(--stl-color-background);
+  /* work around chrome bug where the background-color isn’t getting painted in the overscroll? */
+  background-image: linear-gradient(to bottom, var(--stl-color-background), var(--stl-color-background));
+  background-attachment: fixed;
+
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+@media (min-width: 50rem) {
+  .page > .sidebar :is(.stl-sdk-select, .stldocs-sidebar) {
+    /* align left edge of text with container */
+    margin-inline-start: calc(-1 * var(--stldocs-sidebar-item-padding-inline));
+  }
+}
+
+.stl-sidebar-header-links {
+  display: flex;
+  gap: 1rem;
+  flex-direction: column-reverse;
+}
+
+@media (min-width: 50rem) {
+  .stl-mobile-only-sidebar-item,
+  li:has(> .stl-mobile-only-sidebar-item) {
+    display: none;
+  }
+
+  .stl-sidebar-header-links {
+    display: none;
+  }
+}
+
+/* No sidebar on splash pages */
+.page > .sidebar.hidden {
+  /* Note: on mobile, this will be overridden to display: contents; in order to show the mobile menu */
+  display: none;
+}
+:root:has(.page > .sidebar.hidden) {
+  --stl-sidebar-width: 0px;
+}

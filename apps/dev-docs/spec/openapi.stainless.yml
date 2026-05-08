@@ -1,0 +1,197 @@
+# yaml-language-server: $schema=https://app.stainless.com/config-internal.schema.json
+
+organization:
+  # Name of your organization or company, used to determine the name of the client
+  # and headings.
+  name: stainless
+  # Link to your API documentation.
+  docs: ''
+  # Contact email for bug reports, questions, and support requests.
+  contact: ''
+
+# `targets` define the output targets and their customization options, such as
+# whether to emit the Node SDK and what it's package name should be.
+targets:
+  typescript:
+    package_name: stainless-v0
+    production_repo: stainless-api/stainless-api-typescript
+    publish:
+      npm: false
+  go:
+    package_name: stainless-v0
+    production_repo: stainless-api/stainless-api-go
+    options:
+      enable_v2: true
+  cli:
+    binary_name: stl
+    production_repo: stainless-api/stainless-api-cli
+    options:
+      go_sdk_version: v0.7.0
+    publish:
+      macos: {}
+      homebrew:
+        tap_repo: stainless-api/homebrew-stl
+        homepage: https://stainless.com
+        description: The official CLI for stainless.
+
+# `environments` are a map of the name of the environment (e.g. "sandbox",
+# "production") to the corresponding url to use.
+environments:
+  production: https://api.stainless.com
+
+# `resources` define the structure and organization for your API, such as how
+# methods and models are grouped together and accessed. See the [configuration
+# guide] for more information.
+#
+# [configuration guide]: https://app.stainless.com/docs/guides/configure#resources
+resources:
+  projects:
+    methods:
+      retrieve: get /v0/projects/{project}
+      update: patch /v0/projects/{project}
+      list: get /v0/projects
+      create: post /v0/projects
+    # Subresources define resources that are nested within another for more powerful
+    # logical groupings, e.g. `cards.payments`.
+    subresources:
+      branches:
+        # Configure the models--named types--defined in the resource. Each key in the
+        # object is the name of the model and the value is either the name of a schema in
+        # `#/components/schemas` or an object with more detail.
+        #
+        # [reference]: https://app.stainless.com/docs/reference/config#model
+        models:
+          project_branch: '#/components/schemas/ProjectBranch'
+        methods:
+          create: post /v0/projects/{project}/branches
+          retrieve: get /v0/projects/{project}/branches/{branch}
+      configs:
+        methods:
+          retrieve: get /v0/projects/{project}/configs
+          guess: post /v0/projects/{project}/configs/guess
+      snippets:
+        skip: true
+        methods:
+          create_request: post /v0/projects/{projectName}/snippets/request
+
+  builds:
+    models:
+      build_object: '#/components/schemas/BuildObject'
+      build_target: '#/components/schemas/BuildTarget'
+    methods:
+      list: get /v0/builds
+      create: post /v0/builds
+      retrieve: get /v0/builds/{buildId}
+      compare: post /v0/builds/compare
+    subresources:
+      target_outputs:
+        methods:
+          retrieve: get /v0/build_target_outputs
+  orgs:
+    methods:
+      list: get /v0/orgs
+      retrieve: get /v0/orgs/{org}
+
+settings:
+  # All generated integration tests that hit the prism mock http server are marked
+  # as skipped. Removing this setting or setting it to false enables tests, but
+  # doing so may result in test failures due to bugs in the test server.
+  #
+  # [prism mock http server]: https://stoplight.io/open-source/prism
+  disable_mock_tests: true
+  license: Apache-2.0
+
+# `client_settings` define settings for the API client, such as extra constructor
+# arguments (used for authentication), retry behavior, idempotency, etc.
+client_settings:
+  opts:
+    api_key:
+      type: string
+      read_env: STAINLESS_V0_API_KEY
+      nullable: true
+      auth:
+        security_scheme: bearerAuth
+    project:
+      type: string
+      nullable: false
+      example: example-project
+      send_as_body_param: project
+      send_as_query_param: project
+      send_as_path_param: project
+
+openapi:
+  transformations:
+    - command: mergeObject
+      reason: yuh
+      args:
+        target:
+          - $.components.schemas.BuildTarget..[?(@ && @.properties && @.properties.conclusion)]
+        object:
+          discriminator:
+            propertyName: conclusion
+
+    - command: mergeObject
+      reason: yuh
+      args:
+        target:
+          - $.components.schemas.BuildTarget.properties.commit
+          - $.components.schemas.BuildTarget.properties.lint
+          - $.components.schemas.BuildTarget.properties.test
+          - $.components.schemas.BuildTarget.properties.build
+          - $.components.schemas.BuildTarget.properties.upload
+        object:
+          discriminator:
+            propertyName: status
+
+    - command: replaceValue
+      reason: enum name conflict in ts
+      args:
+        target:
+          - $.components.schemas.BuildTarget.properties...properties.completed.properties.conclusion.enum
+        value:
+          - success
+          - failure
+          - skipped
+          - cancelled
+          - action_required
+          - neutral
+          - timed_out
+          - error
+          - warning
+          - note
+          - merge_conflict
+          - upstream_merge_conflict
+          - fatal
+          - payment_required
+          - noop
+          - version_bump
+
+# `readme` is used to configure the code snippets that will be rendered in the
+# README.md of various SDKs. In particular, you can change the `headline`
+# snippet's endpoint and the arguments to call it with.
+readme:
+  example_requests:
+    default:
+      type: request
+      endpoint: post /v0/builds
+      params: {}
+    headline:
+      type: request
+      endpoint: post /v0/builds
+      params: {}
+diagnostics:
+  ignored:
+    Endpoint/NotConfigured:
+      - get /v0/openapi
+      - post /v0/webhooks/postman/notifications
+      - post /v0/projects/{projectName}/snippets/request
+security_schemes:
+  bearerAuth:
+    type: http
+    scheme: bearer
+security:
+  - bearerAuth: []
+docs:
+  languages:
+    - typescript
+    - http

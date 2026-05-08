@@ -1,0 +1,175 @@
+---
+title: Badges
+description: Badges examples
+---
+
+import { Badge } from '@stainless-api/docs/components';
+import { ThumbsUpIcon } from 'lucide-react';
+
+
+## Plain badges
+
+### Text only
+
+{/** @type {const} */ (['sm', 'md', 'lg']).map((size) => (
+  <div style={{ marginBottom: '1rem', display: 'flex', gap: '0.5rem' }} key={size}>
+    {/** @type {const} */ (['none', 'info', 'success', 'warning', 'danger', 'note', 'tip', 'accent']).map((variant) => (
+      <Badge
+        key={variant}
+        intent={variant}
+        size={size}
+      >
+        {variant === 'none' ? 'Default' : variant.charAt(0).toUpperCase() + variant.slice(1)}
+      </Badge>
+    ))}
+  </div>
+))}
+
+{/** @type {const} */ (['sm', 'md', 'lg']).map((size) => (
+  <div style={{ marginBottom: '1rem', display: 'flex', gap: '0.5rem' }} key={size}>
+    {/** @type {const} */ (['none', 'info', 'success', 'warning', 'danger', 'note', 'tip', 'accent']).map((variant) => (
+      <Badge
+        key={variant}
+        intent={variant}
+        size={size}
+        solid
+      >
+        {variant === 'none' ? 'Default' : variant.charAt(0).toUpperCase() + variant.slice(1)}
+      </Badge>
+    ))}
+  </div>
+))}
+
+### Text and icon
+
+{/** @type {const} */ (['sm', 'md', 'lg']).map((size) => (
+  <div style={{ marginBottom: '1rem', display: 'flex', gap: '0.5rem' }} key={size}>
+    {/** @type {const} */ (['none', 'info', 'success', 'warning', 'danger', 'note', 'tip', 'accent']).map((variant) => (
+      <Badge
+        key={variant}
+        intent={variant}
+        size={size}
+      >
+        <ThumbsUpIcon slot="icon" />
+        {variant === 'none' ? 'Default' : variant.charAt(0).toUpperCase() + variant.slice(1)}
+      </Badge>
+    ))}
+  </div>
+))}
+
+{/** @type {const} */ (['sm', 'md', 'lg']).map((size) => (
+  <div style={{ marginBottom: '1rem', display: 'flex', gap: '0.5rem' }} key={size}>
+    {/** @type {const} */ (['none', 'info', 'success', 'warning', 'danger', 'note', 'tip', 'accent']).map((variant) => (
+      <Badge
+        key={variant}
+        intent={variant}
+        size={size}
+        solid
+      >
+        <ThumbsUpIcon slot="icon" />
+        {variant === 'none' ? 'Default' : variant.charAt(0).toUpperCase() + variant.slice(1)}
+      </Badge>
+    ))}
+  </div>
+))}
+
+### Icon only
+
+<div style={{ display: 'grid', gridTemplateColumns: 'max-content max-content', gap: '2rem' }}>
+  <div style={{ margin: '0' }}>
+    {/** @type {const} */ (['sm', 'md', 'lg']).map((size) => (
+      <div style={{ marginBottom: '1rem', display: 'flex', gap: '0.5rem' }} key={size}>
+        {/** @type {const} */ (['none', 'info', 'success', 'warning', 'danger', 'note', 'tip', 'accent']).map((variant) => (
+          <Badge
+            key={variant}
+            intent={variant}
+            size={size}
+          >
+            <ThumbsUpIcon slot="icon" />
+          </Badge>
+        ))}
+      </div>
+    ))}
+  </div>
+
+  <div style={{ margin: '0' }}>
+    {/** @type {const} */ (['sm', 'md', 'lg']).map((size) => (
+      <div style={{ marginBottom: '1rem', display: 'flex', gap: '0.5rem' }} key={size}>
+        {/** @type {const} */ (['none', 'info', 'success', 'warning', 'danger', 'note', 'tip', 'accent']).map((variant) => (
+          <Badge
+            key={variant}
+            intent={variant}
+            size={size}
+            solid
+          >
+            <ThumbsUpIcon slot="icon" />
+          </Badge>
+        ))}
+      </div>
+    ))}
+  </div>
+</div>
+
+
+## HTTP badges
+
+### Icon and text
+
+{/** @type {const} */ (['sm', 'md', 'lg']).map((size) => (
+  <div style={{ marginBottom: '1rem', display: 'flex', gap: '0.5rem' }} key={size}>
+    {/** @type {const} */ (['GET', 'POST', 'PUT', 'PATCH', 'DELETE']).map((method) => (
+      <Badge.HTTP
+        key={method}
+        size={size}
+        method={method}
+      />
+    ))}
+  </div>
+))}
+{/** @type {const} */ (['sm', 'md', 'lg']).map((size) => (
+  <div style={{ marginBottom: '1rem', display: 'flex', gap: '0.5rem' }} key={size}>
+    {/** @type {const} */ (['GET', 'POST', 'PUT', 'PATCH', 'DELETE']).map((method) => (
+      <Badge.HTTP
+        key={method}
+        size={size}
+        method={method}
+        solid
+      />
+    ))}
+  </div>
+))}
+
+### Icon only
+
+<div style={{ display: 'grid', gridTemplateColumns: 'max-content max-content', gap: '2rem' }}>
+  <div style={{ margin: '0' }}>
+    {/** @type {const} */ (['sm', 'md', 'lg']).map((size) => (
+      <div style={{ marginBottom: '1rem', display: 'flex', gap: '0.5rem' }} key={size}>
+        {/** @type {const} */ (['GET', 'POST', 'PUT', 'PATCH', 'DELETE']).map((method) => (
+          <Badge.HTTP
+            key={method}
+            size={size}
+            method={method}
+            iconOnly
+          />
+        ))}
+      </div>
+    ))}
+  </div>
+
+  <div style={{ margin: '0' }}>
+    {/** @type {const} */ (['sm', 'md', 'lg']).map((size) => (
+      <div style={{ marginBottom: '1rem', display: 'flex', gap: '0.5rem' }} key={size}>
+        {/** @type {const} */ (['GET', 'POST', 'PUT', 'PATCH', 'DELETE']).map((method) => (
+          <Badge.HTTP
+            key={method}
+            size={size}
+            method={method}
+            iconOnly
+            solid
+          />
+        ))}
+      </div>
+    ))}
+  </div>
+</div>

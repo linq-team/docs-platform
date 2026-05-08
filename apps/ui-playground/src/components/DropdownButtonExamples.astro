@@ -1,0 +1,36 @@
+---
+import { DropdownButton } from '@stainless-api/docs/components';
+import { Plus } from 'lucide-react';
+---
+
+<DropdownButton id="dropdown-button-example">
+  <DropdownButton.PrimaryAction>This is the primary action</DropdownButton.PrimaryAction>
+  <DropdownButton.Trigger />
+
+  <DropdownButton.Menu>
+    <DropdownButton.MenuItem value="item-1">
+      <DropdownButton.Icon><Plus size={16} /></DropdownButton.Icon>
+      <DropdownButton.MenuItemText>This is an additional option</DropdownButton.MenuItemText>
+    </DropdownButton.MenuItem>
+    <DropdownButton.MenuItem value="item-2">
+      <DropdownButton.Icon><Plus size={16} /></DropdownButton.Icon>
+      <DropdownButton.MenuItemText>And so is this</DropdownButton.MenuItemText>
+    </DropdownButton.MenuItem>
+    <DropdownButton.MenuItem value="item-3">
+      <DropdownButton.Icon><Plus size={16} /></DropdownButton.Icon>
+      <DropdownButton.MenuItemText>And this is as well</DropdownButton.MenuItemText>
+    </DropdownButton.MenuItem>
+  </DropdownButton.Menu>
+</DropdownButton>
+
+<script>
+  import { initDropdownButton } from '@stainless-api/docs/components/scripts';
+
+  document.addEventListener('DOMContentLoaded', () => {
+    initDropdownButton({
+      dropdown: document.getElementById('dropdown-button-example')!,
+      onSelect: (value) => alert(`Selected: ${value}`),
+      onPrimaryAction: () => alert('Primary action triggered'),
+    });
+  });
+</script>

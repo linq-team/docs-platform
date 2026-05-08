@@ -1,0 +1,17 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "rangeStrategy": "bump",
+  "postUpdateOptions": ["pnpmDedupe"],
+  "packageRules": [
+    {
+      "matchDepTypes": ["peerDependencies", "engines"],
+      "rangeStrategy": "widen"
+    },
+    {
+      "matchManagers": ["github-actions"],
+      "rangeStrategy": "replace"
+    }
+  ],
+  "lockFileMaintenance": { "enabled": true }
+}

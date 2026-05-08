@@ -1,0 +1,277 @@
+# yaml-language-server: $schema=https://app.stainless.com/config-internal.schema.json
+
+organization:
+  # Name of your organization or company, used to determine the name of the client
+  # and headings.
+  name: stainless
+  # Link to your API documentation.
+  docs: 'https://www.stainless.com/docs/getting-started/quickstart-cli'
+  # Contact email for bug reports, questions, and support requests.
+  contact: 'support@stainless.com'
+
+# `targets` define the output targets and their customization options, such as
+# whether to emit the Node SDK and what it's package name should be.
+targets:
+  typescript:
+    package_name: '@stainless-api/sdk'
+    production_repo: stainless-api/stainless-api-typescript
+    publish:
+      npm:
+        auth_method: oidc
+    options:
+      mcp_server:
+        enable_all_resources: true
+        package_name: '@stainless-api/sdk-mcp'
+        publish:
+          docker: 'stainlessapi/stainless-mcp'
+        host:
+          stainless: true
+        instructions: |
+          You are a nice, friendly bot who really likes to help customers!
+      package_manager: pnpm
+  go:
+    package_name: stainless
+    production_repo: stainless-api/stainless-api-go
+    options:
+      enable_v2: true
+      experimental_path_param_encoding: true
+  cli:
+    binary_name: stl
+    production_repo: stainless-api/stainless-api-cli
+    options:
+      go_sdk_version: v0.30.0
+    publish:
+      macos: {}
+      homebrew:
+        tap_repo: stainless-api/homebrew-tap
+        homepage: https://stainless.com
+        description: The official CLI for stainless.
+  python:
+    package_name: stainless_v0
+    production_repo: null
+    publish:
+      pypi: false
+  java:
+    reverse_domain: com.stainless.api
+    production_repo: null
+    publish:
+      maven: false
+  ruby:
+    edition: ruby.2025-10-08
+    gem_name: stainless-v0
+    production_repo: null
+    publish:
+      rubygems: false
+  csharp:
+    edition: csharp.2025-10-08
+    package_name: stainless-v0
+    production_repo: null
+    publish:
+      nuget: false
+  sql:
+    extension_name: stainless_v0
+    publish:
+      pgxn: false
+  kotlin:
+    edition: kotlin.2025-10-08
+    reverse_domain: com.CONFIGURE_ME_stainless_v0.api
+    production_repo: null
+    publish:
+      maven: false
+  php:
+    edition: php.2025-10-08
+    package_name: stainless-v0
+    production_repo: null
+    composer_package_name: org-placeholder/stainless-v0
+
+# `environments` are a map of the name of the environment (e.g. "sandbox",
+# "production") to the corresponding url to use.
+environments:
+  production: https://api.stainless.com
+  staging: https://staging.stainless.com
+
+# `resources` define the structure and organization for your API, such as how
+# methods and models are grouped together and accessed. See the [configuration
+# guide] for more information.
+#
+# [configuration guide]: https://app.stainless.com/docs/guides/configure#resources
+resources:
+  $shared:
+    models:
+      target: '#/components/schemas/Target'
+      commit: '#/components/schemas/Commit'
+      file_input: FileInput
+  projects:
+    methods:
+      retrieve: get /v0/projects/{project}
+      update: patch /v0/projects/{project}
+      list: get /v0/projects
+      create: post /v0/projects
+      generate_commit_message: post /v0/projects/{project}/generate_commit_message
+    # Subresources define resources that are nested within another for more powerful
+    # logical groupings, e.g. `cards.payments`.
+    subresources:
+      branches:
+        # Configure the models--named types--defined in the resource. Each key in the
+        # object is the name of the model and the value is either the name of a schema in
+        # `#/components/schemas` or an object with more detail.
+        #
+        # [reference]: https://app.stainless.com/docs/reference/config#model
+        models:
+          project_branch: '#/components/schemas/ProjectBranch'
+        methods:
+          create: post /v0/projects/{project}/branches
+          retrieve: get /v0/projects/{project}/branches/{branch}
+          list: get /v0/projects/{project}/branches
+          delete: delete /v0/projects/{project}/branches/{branch}
+          rebase: put /v0/projects/{project}/branches/{branch}/rebase
+          reset: put /v0/projects/{project}/branches/{branch}/reset
+      configs:
+        methods:
+          retrieve: get /v0/projects/{project}/configs
+          guess: post /v0/projects/{project}/configs/guess
+      snippets:
+        skip: true
+        methods:
+          create_request: post /v0/projects/{projectName}/snippets/request
+    models:
+      project: '#/components/schemas/Project'
+
+  builds:
+    models:
+      build: '#/components/schemas/Build'
+      build_target: '#/components/schemas/BuildTarget'
+      check_step: '#/components/schemas/CheckStep'
+    methods:
+      list: get /v0/builds
+      create: post /v0/builds
+      retrieve: get /v0/builds/{buildId}
+      compare:
+        endpoint: post /v0/builds/compare
+        mcp: false
+    subresources:
+      diagnostics:
+        methods:
+          list: get /v0/builds/{buildId}/diagnostics
+        models:
+          build_diagnostic: '#/components/schemas/BuildDiagnostic'
+          build_diagnostic_more: '#/components/schemas/BuildDiagnosticMore'
+      target_outputs:
+        methods:
+          retrieve: get /v0/build_target_outputs
+  orgs:
+    methods:
+      list: get /v0/orgs
+      retrieve: get /v0/orgs/{org}
+    models:
+      org: '#/components/schemas/Org'
+  spec:
+    skip: true
+    methods:
+      retrieve_decorated_spec: get /v0/spec/application/{clientId}/{projectName}
+  user:
+    methods:
+      retrieve: get /v0/user
+
+pagination:
+  - name: page
+    type: cursor
+    request:
+      cursor:
+        type: string
+        x-stainless-pagination-property:
+          purpose: next_cursor_param
+    response:
+      data:
+        type: array
+        items:
+          type: unknown
+        x-stainless-pagination-property:
+          purpose: items
+      next_cursor:
+        type: string
+        x-stainless-pagination-property:
+          purpose: next_cursor_field
+
+settings:
+  # All generated integration tests that hit the prism mock http server are marked
+  # as skipped. Removing this setting or setting it to false enables tests, but
+  # doing so may result in test failures due to bugs in the test server.
+  #
+  # [prism mock http server]: https://stoplight.io/open-source/prism
+  disable_mock_tests: false
+  license: Apache-2.0
+
+# `client_settings` define settings for the API client, such as extra constructor
+# arguments (used for authentication), retry behavior, idempotency, etc.
+client_settings:
+  opts:
+    api_key:
+      type: string
+      read_env: STAINLESS_API_KEY
+      nullable: true
+      auth:
+        security_scheme: bearerAuth
+    project:
+      type: string
+      nullable: true
+      example: example-project
+      send_as_body_param: project
+      send_as_query_param: project
+      send_as_path_param: project
+
+openapi:
+  code_samples: stainless
+  code_sample_languages:
+    curl: true
+    powershell: true
+  transformations:
+    - command: mergeObject
+      reason: yuh
+      args:
+        target:
+          - $.components.schemas.CheckStep
+          - $.components.schemas.CommitStep
+        object:
+          discriminator:
+            propertyName: status
+
+    - command: guessDiscriminantUnions
+      reason: stl api doesn't generate discriminator for some reason
+
+# `readme` is used to configure the code snippets that will be rendered in the
+# README.md of various SDKs. In particular, you can change the `headline`
+# snippet's endpoint and the arguments to call it with.
+readme:
+  example_requests:
+    default:
+      type: request
+      endpoint: post /v0/builds
+      params:
+        project: stainless
+        revision: main
+    headline:
+      type: request
+      endpoint: post /v0/builds
+      params:
+        project: stainless
+        revision: main
+    pagination:
+      type: request
+      endpoint: get /v0/builds
+      params:
+        project: stainless
+security_schemes:
+  bearerAuth:
+    type: http
+    scheme: bearer
+security:
+  - bearerAuth: []
+unspecified_endpoints:
+  - get /v0/openapi
+diagnostics:
+  ignored:
+    Readme/MissingPaginationSnippet: true
+    Schema/CannotInferUnionVariantName: true
+    Schema/CannotInferName:
+      - (resource) builds > (method) list > (params) default > (param) revision > (schema) > (variant) 1 > (items)

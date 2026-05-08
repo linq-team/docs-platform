@@ -1,0 +1,43 @@
+{
+  "eslint.workingDirectories": [
+    {
+      "mode": "auto"
+    }
+  ],
+  "editor.insertSpaces": true,
+  "editor.tabSize": 2,
+  "files.trimTrailingWhitespace": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[mdx]": {
+    "editor.defaultFormatter": "unifiedjs.vscode-mdx"
+  },
+  "[astro]": {
+    "editor.defaultFormatter": "astro-build.astro-vscode"
+  },
+
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact",
+    "astro",
+    "mdx"
+  ],
+
+  "eslint.runtime": "node",
+  "eslint.options": {
+    "flags": ["unstable_native_nodejs_ts_config"]
+  },
+
+
+  "js/ts.tsdk.path": "./node_modules/typescript/lib/tsserver.js",
+
+  "json.schemaDownload.trustedDomains": {
+    "https://raw.githubusercontent.com/": true,
+    "https://json.schemastore.org/": true,
+    "https://unpkg.com/": true,
+    "https://docs.renovatebot.com/": true,
+    "https://turborepo.com/": true
+  },
+  "json.schemaDownload.enable": true
+}

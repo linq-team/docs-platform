@@ -1,0 +1,8 @@
+/* @import '@stainless-api/ui-primitives/styles.css'; */
+@import '@stainless-api/docs/mintlify-compat.css';
+
+/* Rests */
+
+button {
+  margin: 0;
+}

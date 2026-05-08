@@ -1,0 +1,256 @@
+:root {
+  --stl-page-max-width: 90rem;
+
+  /* 0.75rem at 25rem width (phone); 1.5rem at 72rem width (desktop) */
+  --_stl-page-min-padding-mobile-rem: 0.75;
+  --_stl-page-min-padding-desktop-rem: 1.5;
+  --_stl-page-min-padding-slope: (
+    (var(--_stl-page-min-padding-desktop-rem) - var(--_stl-page-min-padding-mobile-rem)) / (72 - 25)
+  );
+  --stl-page-min-padding: clamp(
+    var(--_stl-page-min-padding-mobile-rem) * 1rem,
+    var(--_stl-page-min-padding-slope) * (100vw - 25rem) + var(--_stl-page-min-padding-mobile-rem) * 1rem,
+    var(--_stl-page-min-padding-desktop-rem) * 1rem
+  );
+
+  --stl-content-max-width: 52rem;
+  --stl-content-padding: 2rem;
+  --stl-two-column-content-max-width: 80rem;
+
+  --stl-sidebar-width: 16.5rem;
+  --stl-nav-height: 3.5rem; /* has to be statically sized in order to correctly position the viewport-end grid area :( */
+  --stl-nav-gap: 0.5rem;
+
+  --stl-page-width: min(var(--stl-page-max-width), 100vw);
+  --vw: calc(var(--stl-page-width) / 100);
+
+  scroll-padding-top: calc(var(--stl-nav-height) + 1rem);
+}
+@media (min-width: 50rem) {
+  :root:has(.stl-secondary-nav-tabs) {
+    --stl-nav-height: 5.5rem;
+    header {
+      padding-top: 0.25rem;
+    }
+  }
+}
+
+/* Grid layout */
+
+.page {
+  display: grid;
+
+  /* TODO: verify that env-safe-area-inset is behaving as we expect */
+  --stl-viewport-width: calc(
+    100vw - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px) -
+      var(--stl-chat-panel-width, 0px)
+  );
+  --stl-page-gutter-left: calc(
+    env(safe-area-inset-left, 0px) +
+      max(var(--stl-page-min-padding), (var(--stl-viewport-width) - var(--stl-page-max-width)) / 2)
+  );
+  --stl-page-gutter-right: calc(
+    env(safe-area-inset-right, 0px) +
+      max(var(--stl-page-min-padding), (var(--stl-viewport-width) - var(--stl-page-max-width)) / 2)
+  );
+
+  /* prettier-ignore */
+  grid:
+    /*  header + content have two identical columns because in mobile layout the menu trigger takes up the latter */
+    ' gutter-left                  header                   header          header   header  gutter-right                  chat' var(--stl-nav-height)                 /* nav */
+    ' gutter-left                  sidebar                  content         content  toc     gutter-right                  chat' calc(100dvh - var(--stl-nav-height))  /* viewport (above the fold) */
+    [viewport-end]
+    ' gutter-left                  .                        content         content  .       gutter-right                  .   ' auto                                  /* rest of page height */
+    / var(--stl-page-gutter-left)  var(--stl-sidebar-width) minmax(0, 1fr)  auto     auto    var(--stl-page-gutter-right)  auto;
+}
+
+.page > main,
+.page > .sidebar > .sidebar-pane,
+.page > .right-sidebar-panel nav {
+  padding-block-start: 1rem;
+}
+
+/* Sticky header and tabs */
+
+.page > header {
+  grid-area: header;
+  margin-left: calc(-1 * var(--stl-page-gutter-left));
+  margin-right: calc(-1 * var(--stl-page-gutter-right));
+  padding-left: var(--stl-page-gutter-left);
+  padding-right: var(--stl-page-gutter-right);
+}
+
+header {
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid var(--stl-color-border-faint);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--stl-color-background);
+}
+
+@layer starlight.core {
+  header > .header {
+    all: revert-layer;
+  }
+}
+
+header > .header {
+  flex: 1;
+  display: flex;
+  gap: var(--stl-nav-gap);
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header site-search > button {
+  @media (min-width: 50rem) {
+    margin-inline: 2rem;
+    flex: 1 1 12rem;
+  }
+}
+
+.header .right-group {
+  display: flex;
+  align-items: stretch;
+}
+
+/* Sticky sidebar and toc. Outer wrapper “sticks” to top of page, subgrid pushes child down below header */
+.page > .sidebar {
+  grid-area: sidebar;
+  /* sidebar should bleed to left edge of page in case people want to color it */
+  margin-left: calc(-1 * var(--stl-page-gutter-left));
+  padding-left: var(--stl-page-gutter-left);
+}
+
+.page > .right-sidebar-panel {
+  grid-area: toc;
+}
+
+.page > .sidebar,
+.page > .right-sidebar-panel {
+  align-self: start;
+  grid-row-start: header-start;
+  display: grid;
+  grid-template-rows: subgrid;
+  grid-template-columns: subgrid;
+  position: sticky;
+  top: 0;
+}
+.page > .sidebar > .sidebar-pane,
+.page > .right-sidebar-panel > starlight-toc {
+  grid-area: inherit;
+  grid-row-start: header-end;
+  overflow-y: auto;
+  overflow-x: clip;
+}
+
+/* Page content */
+
+.page > main {
+  grid-area: content;
+  width: 100%;
+  max-width: min(var(--stl-content-max-width), 100%);
+  justify-self: center;
+  padding-inline: var(--stl-content-padding);
+}
+
+.stl-page-nav-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.mobile-preferences {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Two-column layouts go wider */
+.page > main:where(:has(.stldocs-method-double-pane)) {
+  max-width: min(var(--stl-two-column-content-max-width), 100%);
+  padding-inline-start: clamp(
+    var(--stl-content-padding),
+    var(--stl-page-gutter-right) - env(safe-area-inset-right, 0px),
+    var(--stl-content-padding) * 2
+  );
+  padding-inline-end: 0;
+}
+
+/* Responsive page layout */
+
+/* On smaller screens, the main panel takes up the full width and the TOC is hidden */
+@media not (min-width: 72rem) {
+  .page > main {
+    /* right edge of content goes up to right gutter to align with header */
+    padding-inline-end: 0;
+    max-width: 100%;
+  }
+
+  .page > .right-sidebar-panel {
+    display: none;
+  }
+}
+
+/* On mobile screens, the sidebar and nav links collapse */
+@media not (min-width: 50rem) {
+  header {
+    padding-top: 0;
+    display: grid;
+    grid-template-columns: subgrid;
+  }
+
+  header > .header {
+    grid-column: span 2;
+  }
+
+  /* Sidebar moves to cover content area, hidden by default */
+  :root {
+    --stl-sidebar-width: 0px;
+  }
+  .page > .sidebar,
+  .page > .sidebar.hidden {
+    display: contents;
+  }
+  .page > .sidebar > .sidebar-pane {
+    visibility: hidden;
+    grid-area: content;
+    grid-row-end: viewport-end;
+    z-index: 9;
+    /* extend to right edge of page */
+    margin-inline-end: calc(-1 * var(--stl-page-gutter-right));
+    padding-inline-end: var(--stl-page-gutter-right);
+    border-inline-end: 0;
+  }
+  .page > .sidebar > starlight-menu-button[aria-expanded='true'] ~ .sidebar-pane {
+    visibility: visible;
+  }
+
+  /* left padding becomes the left gutter when there’s no sidebar */
+  .page > main {
+    padding-inline-start: 0;
+  }
+
+  /* Sidebar menu button moves to end of header; takes up space in layout (not absolutely positioned as in starlight) */
+  .sidebar starlight-menu-button {
+    grid-column: span 1 / content-end;
+    grid-row: header;
+    display: flex;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    padding-left: var(--stl-nav-gap);
+    z-index: 11;
+  }
+  .sidebar starlight-menu-button button {
+    position: static;
+  }
+
+  .header .right-group {
+    display: none;
+  }
+}

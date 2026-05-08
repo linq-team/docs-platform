@@ -1,0 +1,61 @@
+.stl-ui-steps {
+  padding-left: 0;
+}
+
+.stl-ui-steps__step {
+  --step-icon-width: 24px;
+  --step-padding: 12px;
+  list-style: none;
+  position: relative;
+  padding: var(--step-padding);
+  /* Space for the custom marker */
+  padding-left: calc(var(--step-icon-width) + var(--step-padding));
+  margin: 0;
+
+  &::before {
+    content: counter(list-item);
+    position: absolute;
+    left: 0;
+    top: var(--step-padding);
+    width: var(--step-icon-width);
+    height: var(--step-icon-width);
+    border: 1px solid var(--stl-color-border);
+    border-radius: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--stl-color-bg);
+    z-index: 1;
+    font-size: var(--stl-typography-text-body-xs);
+    font-style: normal;
+    font-weight: 600;
+    line-height: 100%;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: calc(var(--step-icon-width) / 2 - 0.5px);
+    top: calc(var(--step-icon-width) + var(--step-padding));
+    bottom: calc(-1 * (var(--step-padding)));
+    width: 1px;
+    background: var(--stl-color-border);
+  }
+
+  &:last-child {
+    padding-bottom: 0;
+
+    /* No line after the last step */
+    &::after {
+      display: none;
+    }
+  }
+}
+.stl-ui-steps__step-title {
+  font-weight: 600;
+}
+
+.stl-ui-steps__step-content {
+  margin-bottom: 0;
+  margin-top: 4px;
+}

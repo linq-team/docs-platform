@@ -1,0 +1,33 @@
+---
+import Sidebar from 'virtual:starlight/components/Sidebar';
+import MobileMenuToggle from 'virtual:starlight/components/MobileMenuToggle';
+
+import AiChatIsland from './AiChatIsland.tsx'; // entrypoint for client island can’t be conditionally import()ed
+import clsx from 'clsx';
+
+import starlightConfig from 'virtual:starlight/user-config';
+const locale = Astro.currentLocale ?? starlightConfig.defaultLocale.lang;
+const siteTitle = locale && starlightConfig.title[locale];
+
+const { hasSidebar } = Astro.locals.starlightRoute;
+---
+
+<div class="page">
+  <header>
+    <slot name="header" slot="header" />
+  </header>
+
+  <nav
+    class={clsx('sidebar', !hasSidebar && 'hidden')}
+    aria-label={Astro.locals.t('sidebarNav.accessibleLabel')}
+  >
+    <MobileMenuToggle />
+    <div id="starlight__sidebar" class="sidebar-pane">
+      <Sidebar />
+    </div>
+  </nav>
+
+  <slot />
+
+  {__STLDOCS_ENABLE_AI_CHAT__ && <AiChatIsland client:load siteTitle={siteTitle} />}
+</div>

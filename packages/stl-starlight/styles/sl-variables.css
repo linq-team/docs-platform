@@ -1,0 +1,14 @@
+:root {
+  --sl-color-bg-table-row: #ffffff0a;
+  --sl-button-border-radius: 8px;
+  --sl-button-size: 32px;
+  --sl-button-padding-x: 0.75rem;
+  --sl-button-padding-y: 0.5rem;
+  --sl-button-icon-offset: 0.2rem;
+
+  /* TODO: remove --sl-nav-height dependencies */
+  --sl-nav-height: 56px;
+
+  --sl-nav-gap: 0.5rem;
+  --sl-icon-color: var(--stl-color-foreground);
+}

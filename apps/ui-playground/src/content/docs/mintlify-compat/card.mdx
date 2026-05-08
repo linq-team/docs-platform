@@ -1,0 +1,28 @@
+---
+title: Card
+description: Card examples
+---
+
+import { BookIcon } from "lucide-react";
+import { Card, CardGroup } from "@stainless-api/docs/stainless-docs/mintlify-compat";
+
+Card examples
+
+<Card title="This is a card" icon={BookIcon}>
+  This is a card.
+</Card>
+
+<Card title="This is a card" icon={BookIcon} href="https://stainless.com">
+  This is a card.
+</Card>
+
+### Card Group
+
+<CardGroup>
+  <Card title="This is a card" icon={BookIcon} href="https://stainless.com">
+    This is a card.
+  </Card>
+  <Card title="This is a card" icon={BookIcon} href="https://stainless.com">
+    This is a card.
+  </Card>
+</CardGroup>

@@ -1,0 +1,154 @@
+/* revert starlight details styles */
+@layer starlight.content {
+  /* artificially increase specificity to outcompete selectors in the same layer whose styles we want to revert */
+  .stl-ui-prose .sl-markdown-content.sl-markdown-content.sl-markdown-content {
+    details,
+    summary,
+    summary::before,
+    summary::marker {
+      all: revert-layer;
+    }
+  }
+}
+
+.stl-ui-accordion {
+  --stl-ui-accordion-padding: 12px;
+  --stl-ui-accordion-content-padding-bottom: 4px;
+  --stl-ui-accordion-marker-size: 1em;
+  --stl-ui-accordion-marker-margin: calc((1lh - var(--stl-ui-accordion-marker-size)) / 2);
+  --stl-ui-accordion-marker-color: var(--stl-color-border-strong);
+  --stl-ui-accordion-row-gap: 8px;
+  --stl-ui-accordion-summary-column-gap: 8px;
+  --stl-ui-accordion-border-radius: var(--stl-ui-layout-border-radius);
+  /* left inset to make content line up with summary content (after chevron) */
+  --stl-ui--internal--accordion-padding-start: calc(
+    var(--stl-ui-accordion-padding) + var(--stl-ui-accordion-marker-size) +
+      var(--stl-ui-accordion-marker-margin) * 2 + var(--stl-ui-accordion-summary-column-gap)
+  );
+
+  background-color: var(--stl-color-ui-background);
+  border: 1px solid var(--stl-color-border);
+  border-radius: var(--stl-ui-accordion-border-radius);
+  font-size: var(--stl-typography-text-body);
+
+  padding: var(--stl-ui-accordion-padding);
+  /* indent content to line up with left edge of summary content */
+  padding-inline-start: var(--stl-ui--internal--accordion-padding-start);
+
+  & > .stl-ui-accordion__summary {
+    display: block;
+    list-style: none;
+
+    /* summary extends to the edges of the element in order to increase click target */
+    padding: var(--stl-ui-accordion-padding);
+    padding-inline-start: var(--stl-ui--internal--accordion-padding-start);
+    margin: calc(-1 * var(--stl-ui-accordion-padding));
+    margin-inline-start: calc(-1 * var(--stl-ui--internal--accordion-padding-start));
+
+    cursor: pointer;
+    font-weight: 500;
+
+    border-radius: var(--stl-ui-accordion-border-radius);
+
+    &::before {
+      content: '';
+      width: var(--stl-ui-accordion-marker-size);
+      height: var(--stl-ui-accordion-marker-size);
+      margin: var(--stl-ui-accordion-marker-margin);
+      background-color: var(--stl-ui-accordion-marker-color);
+      display: block;
+      position: absolute;
+      --stl-ui-accordion--internal--marker-width: calc(
+        var(--stl-ui-accordion-marker-size) + var(--stl-ui-accordion-marker-margin) * 2
+      );
+      --stl-ui-accordion--internal--summary-marker-transform: translateX(
+        calc(
+          -1 * var(--stl-ui-accordion--internal--marker-width) - var(--stl-ui-accordion-summary-column-gap)
+        )
+      );
+      transform: var(--stl-ui-accordion--internal--summary-marker-transform);
+
+      --lucide-chevron-right: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWNoZXZyb24tcmlnaHQtaWNvbiBsdWNpZGUtY2hldnJvbi1yaWdodCI+PHBhdGggZD0ibTkgMTggNi02LTYtNiIvPjwvc3ZnPg==');
+      mask-image: var(--lucide-chevron-right);
+      mask-size: contain;
+      mask-repeat: no-repeat;
+
+      transition: transform 0.1s ease-out;
+    }
+
+    & > :first-child {
+      margin-top: 0;
+    }
+  }
+
+  &[open] {
+    border-color: var(--stl-color-border-strong);
+    padding-bottom: calc(var(--stl-ui-accordion-padding) + var(--stl-ui-accordion-content-padding-bottom));
+
+    & > .stl-ui-accordion__summary {
+      /* padding-bottom shouldn’t extend beyond the row gap while open, i.e. we shouldn’t be negative-margin-placing content overlapping summary */
+      --stl-ui--internal--summary-padding-bottom: min(
+        var(--stl-ui-accordion-padding),
+        var(--stl-ui-accordion-row-gap)
+      );
+      padding-bottom: var(--stl-ui--internal--summary-padding-bottom);
+      margin-bottom: calc(var(--stl-ui-accordion-row-gap) - var(--stl-ui--internal--summary-padding-bottom));
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+
+      &::before {
+        transform: var(--stl-ui-accordion--internal--summary-marker-transform) rotate(90deg);
+      }
+    }
+  }
+
+  &:has(> .stl-ui-accordion__summary:hover) {
+    background-color: var(--stl-color-ui-background-hover);
+  }
+
+  & > .stl-ui-accordion__summary + * {
+    margin-top: 0;
+  }
+}
+
+/* Groups */
+
+.stl-ui-accordion-group {
+  & > .stl-ui-accordion:has(+ .stl-ui-accordion) {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    & > .stl-ui-accordion__summary {
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+  }
+
+  & > .stl-ui-accordion + .stl-ui-accordion {
+    margin-top: 0;
+    border-top-width: 0;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+
+    & > .stl-ui-accordion__summary {
+      border-top-left-radius: 0;
+      border-top-right-radius: 0;
+    }
+  }
+
+  /* Ensure the darker border always extends all the way around the active element, instead of
+   * leaving an inactive border-top */
+
+  .stl-ui-accordion:not(:hover, [open]):has(+ .stl-ui-accordion:hover) {
+    border-bottom-width: 0;
+  }
+  .stl-ui-accordion:not(:hover, [open]) + .stl-ui-accordion:hover {
+    border-top-width: 1px;
+  }
+
+  .stl-ui-accordion:not([open]):has(+ .stl-ui-accordion[open]) {
+    border-bottom-width: 0;
+  }
+  .stl-ui-accordion:not([open]) + .stl-ui-accordion[open] {
+    border-top-width: 1px;
+  }
+}

@@ -1,0 +1,13 @@
+@layer stl-ui.tokens {
+  /* Layout - Stainless */
+  :root {
+    --stl-ui-layout-border-radius-xs: 4px;
+    --stl-ui-layout-border-radius-sml: 8px;
+    --stl-ui-layout-border-radius: 12px;
+    --stl-ui-layout-border-radius-med: 16px;
+    --stl-ui-layout-border-radius-max: 100vmax;
+    --stl-ui-left-content-indent: 24px;
+
+    --stl-ui-page-padding-inline: 20px;
+  }
+}

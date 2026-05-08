@@ -1,0 +1,91 @@
+.stl-ui-callout {
+  --stl-ui-callout-background-color: var(--stl-color-faint-background);
+  --stl-ui-callout-border-color: var(--stl-color-border);
+  --stl-ui-callout-accent-color: var(--stl-color-foreground);
+
+  border: 1px solid var(--stl-ui-callout-border-color);
+  background-color: var(--stl-ui-callout-background-color);
+  border-radius: var(--stl-ui-layout-border-radius);
+  padding: 12px;
+  line-height: var(--stl-typography-line-height);
+  font-weight: 400;
+  font-size: var(--stl-typography-text-body);
+  color: var(--stl-color-foreground);
+
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+
+  :where(a, strong) {
+    color: var(--stl-ui-callout-strong-color, var(--stl-ui-callout-accent-color));
+  }
+  :where(a) {
+    text-decoration-color: rgba(from currentColor r g b / 0.4);
+    transition: text-decoration-color 0.1s ease;
+    &:hover {
+      text-decoration-color: rgba(from currentColor r g b / 0.8);
+    }
+  }
+
+  ::selection {
+    background-color: light-dark(
+      rgb(from var(--stl-ui-callout-background-color) r g b / 0.2),
+      rgb(from var(--stl-ui-callout-background-color) r g b / 0.35)
+    );
+    color: var(--stl-color-foreground);
+  }
+}
+
+.stl-ui-callout--info {
+  --stl-ui-callout-background-color: var(--stl-color-faint-background);
+  --stl-ui-callout-border-color: var(--stl-color-border);
+  --stl-ui-callout-accent-color: var(--stl-color-foreground-reduced);
+  --stl-ui-callout-strong-color: var(--stl-color-foreground);
+}
+
+.stl-ui-callout--note {
+  --stl-ui-callout-background-color: var(--stl-color-blue-muted-background);
+  --stl-ui-callout-border-color: var(--stl-color-blue-border);
+  --stl-ui-callout-accent-color: var(--stl-color-blue-foreground);
+}
+
+.stl-ui-callout--tip {
+  --stl-ui-callout-background-color: var(--stl-color-purple-muted-background);
+  --stl-ui-callout-border-color: var(--stl-color-purple-border);
+  --stl-ui-callout-accent-color: var(--stl-color-purple-foreground);
+}
+
+.stl-ui-callout--success {
+  --stl-ui-callout-background-color: var(--stl-color-green-muted-background);
+  --stl-ui-callout-border-color: var(--stl-color-green-border);
+  --stl-ui-callout-accent-color: var(--stl-color-green-foreground);
+}
+
+.stl-ui-callout--warning {
+  --stl-ui-callout-background-color: var(--stl-color-yellow-muted-background);
+  --stl-ui-callout-border-color: var(--stl-color-yellow-border);
+  --stl-ui-callout-accent-color: var(--stl-color-yellow-foreground);
+}
+
+.stl-ui-callout--danger {
+  --stl-ui-callout-background-color: var(--stl-color-red-muted-background);
+  --stl-ui-callout-border-color: var(--stl-color-red-border);
+  --stl-ui-callout-accent-color: var(--stl-color-red-foreground);
+}
+
+.stl-ui-callout__icon {
+  color: var(--stl-ui-callout-accent-color);
+  flex-shrink: 0;
+  width: 1em;
+  height: 1em;
+  margin: calc((1lh - 1em) / 2);
+}
+
+.stl-ui-callout__content {
+  flex: 1;
+  margin-top: 0;
+
+  & > :first-child {
+    margin-top: 0;
+  }
+}

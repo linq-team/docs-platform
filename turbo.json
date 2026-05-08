@@ -1,0 +1,59 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "ui": "tui",
+  "tasks": {
+    "sync": {
+      "dependsOn": ["^build"],
+      "outputs": [".astro/**"]
+    },
+    "vendor-deps": {
+      "cache": false,
+      "env": ["STAINLESS_ROOT"]
+    },
+    "build": {
+      "dependsOn": ["^build", "sync"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": [".astro/**", "dist/**"],
+      "env": ["STAINLESS_API_KEY"]
+    },
+    "build:ci": {
+      "dependsOn": ["sync", "^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": [".astro/**"],
+      "env": [
+        "STAINLESS_API_KEY",
+        "STAINLESS_DOCS_SITE_ID",
+        "PUBLIC_ALGOLIA_APP_ID",
+        "PUBLIC_ALGOLIA_INDEX",
+        "PUBLIC_ALGOLIA_SEARCH_KEY",
+        "PRIVATE_ALGOLIA_WRITE_KEY",
+        "BASE_URL"
+      ]
+    },
+    "lint": {
+      "dependsOn": ["^lint", "sync"]
+    },
+    "//#check:types:coverage": {},
+    "//#check:types:scripts": {},
+    "check:types": {
+      "dependsOn": ["//#check:types:coverage", "^check:types", "^build", "//#check:types:scripts"]
+    },
+    "//#check:format": {},
+    "//#knip": {},
+    "check": {
+      "dependsOn": ["^check:types", "//#check:format", "^lint", "//#knip"]
+    },
+    "test": {
+      "dependsOn": ["^test"]
+    },
+    "dev": {
+      "dependsOn": ["sync"],
+      "cache": false,
+      "persistent": true
+    },
+    "preview": {
+      "cache": false,
+      "persistent": true
+    }
+  }
+}

@@ -1,0 +1,28 @@
+---
+import { Image, type LocalImageProps, type RemoteImageProps } from 'astro:assets';
+
+type ImgProps = LocalImageProps | RemoteImageProps;
+
+type Props = ImgProps & {
+  subtitle?: string;
+  noBorder?: boolean;
+  className?: string;
+};
+
+const { noBorder, className, ...rest } = Astro.props;
+---
+
+<Image {...rest} class={`stl-image-img ${noBorder ? 'no-border' : ''} ${className ? className : ''}`} />
+
+<style>
+  .stl-image-img {
+    border: 2px solid var(--stl-color-muted-background);
+    border-radius: 16px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .stl-image-img.no-border {
+    border: none;
+  }
+</style>

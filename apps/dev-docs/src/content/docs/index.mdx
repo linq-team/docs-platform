@@ -1,0 +1,175 @@
+---
+title: Quickstart with Stainless SDKs
+description: Stainless is the fastest and easiest way to go from OpenAPI spec to idiomatic, polished SDKs. Our quickstart covers using the SDK Studio, uploading a spec, editing your SDKs, and pushing to production.
+sidebar:
+  label: Quickstart
+head:
+  - tag: title
+    content: Quickstart docs | Stainless SDKs
+ogImageOptions:
+  logo: './src/assets/custom-og-image.png'
+  theme: 'dark'
+  title: "This is a custom og title"
+  description: "This is a custom og description"
+---
+
+import Header from "@/assets/getting-started/header.svg";
+import ProjectBuildStagingRepo from '@/assets/getting-started/project-build-staging-repo.png';
+import SDKStudio from '@/assets/getting-started/studio.png';
+import BuildPanelFlow from '@/assets/getting-started/build-panel-flow.png';
+import Diagnostics from '@/assets/getting-started/diagnostics.png';
+import InitialProjectCreation from '@/assets/getting-started/initial-project-creation.png';
+import { StainlessImage, StainlessStep } from '@/components';
+import { LinkCard, Steps } from '@astrojs/starlight/components';
+import { Steps as StainlessSteps, Step as StainlessUIStep } from '@stainless-api/docs/components';
+
+<div width="100%" style={{ marginBottom: '2rem' }}>
+    <figure>
+      <Header />
+    </figure>
+</div>
+
+### Introduction
+
+<div style={{ fontFamily: "var(--custom-font)" }}>
+  Look at this crazy font
+</div>
+
+Idiomatic and polished SDKs for your API drive faster integration, broader adoption, quicker upgrades, and trust in
+your engineering quality.
+
+In this guide, you will generate SDKs from your OpenAPI specification that can be shipped as a beta
+to your users. You can iterate from there, polishing and shaping the SDKs.
+
+### Before getting started
+
+To get the most out of this guide, you’ll need:
+
+- A [GitHub](https://github.com) account, used for authenticating with Stainless.
+
+- An [OpenAPI spec](https://swagger.io/specification/), which is a standard way of describing your API shape. Stainless
+  reads from this specification to generate SDKs.
+
+      If you don’t yet have an OpenAPI spec, you can [create one](guides/create-openapi-spec.md) or
+      [use an example spec](https://learn.openapis.org/examples/v3.0/petstore-expanded.html).
+
+This is an example of steps:
+<Steps>
+1. Hello Stainless
+2. Create a project
+3. Try your SDKs
+4. Use the SDK Studio
+5. Next steps
+</Steps>
+<StainlessSteps>
+  <StainlessUIStep title="Hello Stainless">
+  Hello Stainless
+  ## This is a title
+  </StainlessUIStep>
+  <StainlessUIStep title="Hello Stainless">
+  Hello Stainless
+  </StainlessUIStep>
+</StainlessSteps>
+
+## <StainlessStep step={1} /> Create a project
+
+Once [signed in](https://app.stainless.com/login), you will be directed to create a Stainless organization and your first
+project. Use your OpenAPI spec, or use [an example](https://learn.openapis.org/examples/v3.0/petstore-expanded.html).
+
+
+<StainlessImage src={InitialProjectCreation} alt="Initial project creation" />
+
+:::note
+If you believe you should have access to an organization someone else invited you to, accept
+their invitation first to access your Stainless organization.
+:::
+
+### The Stainless config
+
+While your OpenAPI spec includes much of the information needed to generate an SDK, it doesn't include
+necessary components like the SDK structure, pagination, publishing settings, and more. Stainless uses
+both your OpenAPI spec and Stainless config to generate your SDKs. As part of your first generation, we create
+an initial draft of your Stainless config using an LLM.
+
+## <StainlessStep step={2} /> Try your SDKs
+
+Once your build completes successfully, your SDKs are ready to use.
+
+<StainlessImage src={ProjectBuildStagingRepo} alt="SDK Studio" />
+
+Choose your favorite language. Then click on your **staging** repository corresponding to the language of your
+choice. We output code initially to the staging repository under the `stainless-sdks` GitHub org until you can
+connect a production repo that you own.
+
+- If you want to get started quickly, use GitHub codespaces with the generated dev containers
+- If you want to try it on your machine, follow the instructions in the `CONTRIBUTING.md` of each SDK repository
+
+### Share your SDKs
+
+Take a moment to click on the **Members** tab in your Stainless organization dashboard to add team members. After accepting an email invite and authenticating with their GitHub handle, members are automatically added to your Stainless project and the staging GitHub repositories we generate.
+
+## <StainlessStep step={3} /> Use the SDK Studio
+
+After filling out the project creation form, you'll be taken to the organization dashboard.
+On this page, you can manage API keys and invite organization members. For now, navigate to your
+project and click **Open SDK Studio** at the top-right.
+
+In the SDK Studio, you will see three panes:
+
+<StainlessImage src={SDKStudio} alt="SDK Studio" />
+
+1. The SDK preview pane shows the shape and structure of your SDKs, along with example usage snippets and type definitions.
+2. The editor lets you modify both your OpenAPI spec and Stainless config to see changes reflected live in the documentation panel.
+3. The builds and diagnostics pane shows information about your builds and suggests improvements to your configuration.
+
+### Create new builds
+
+Building your SDK can be done through the **Save & Build SDKs** button at the top-right of the SDK Studio.
+When a build is triggered, you will see a new build in the Builds panel:
+
+<StainlessImage src={BuildPanelFlow} alt="Release flow" />
+
+A "build" includes:
+
+- A push to your config repository, which tracks all configuration changes
+- A push to your **staging** repository
+- A push to your **production** repository if configured
+
+:::note
+The SDK Studio is not the only way to trigger builds. You can also trigger builds through [GitHub Actions or a persistent link](guides/automate-updates#automating-updates).
+:::
+
+### Troubleshooting
+
+The Stainless generator always attempts to output something, even if it isn't perfect.
+
+When the generator detects potential improvements to the OpenAPI spec or the Stainless config, it raises _diagnostics_ in the Diagnostics panel:
+
+<StainlessImage src={Diagnostics} alt="Diagnostics" />
+
+{/* TODO: add color classes/variables */}
+
+- <b style={{ color: 'var(--sl-badge-danger-border)' }}>Error</b>: Indicates issues with the usability of the
+  SDK, such as not being able to compile the library or make a request.
+- <b style={{ color: 'var(--sl-badge-caution-border)' }}>Warning</b>: Indicates major issues with the user
+  experience of the SDK, but doesn't affect usability of the rest of the SDK, such as an invalid schema or a
+  misconfigured endpoint.
+- <b style={{ color: 'var(--sl-badge-note-text)' }}>Note</b>: Indicates potential issues with the user
+  experience of the SDK, but not too consequential for the user.
+
+You can click on a diagnostic for more details about the issue. The diagnostics pane guides you through resolving these issues, but please don't hesitate to <a href="mailto:support@stainless.com">reach out</a> if you need help.
+
+## <StainlessStep step={4} /> Next steps
+
+<LinkCard
+  title="Configure your SDK"
+  href="/guides/configure/"
+  description="The Stainless SDK generator is built with customizability in mind, letting you configure the SDK structure, client options, type names, and more."
+/>
+
+
+<LinkCard
+  title="Publish your SDK"
+  href="/guides/publish/"
+  description="Once the SDK is functional (though perhaps not yet perfect), share it with the broader public by publishing to a package registry."
+/>

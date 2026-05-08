@@ -1,0 +1,1499 @@
+---
+title: Configure your SDKs
+description: Create the perfect SDK for your API and your users by configuring the Stainless Generator
+slug: guides/configure
+# head:
+#   - tag: title
+#     content: Configure your SDKs | Stainless SDKs
+#   - tag: meta
+#     attributes:
+#       property: og:description
+#     content: Create the perfect SDK for your API and your users by configuring the Stainless Generator
+#   - tag: meta
+#     attributes:
+#       property: twitter:description
+#     content: Create the perfect SDK for your API and your users by configuring the Stainless Generator
+#   - tag: link
+#     attributes:
+#       rel: canonical
+#       href: https://www.stainless.com/docs/guides/configure/
+sidebar:
+  label: Configure your SDKs
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+Stainless automatically generates idiomatic yet flexible SDKs for your API. But every API is different. Create the perfect SDK for your API and your users by configuring the Stainless Generator.
+
+When you first generate an SDK with Stainless, we create a reasonable draft configuration for you. You can see and edit it in the [SDK Studio](https://app.stainless.com).
+
+## Core Concepts
+You configure the code structure and names in your SDK by defining **methods**, **models**, and **resources** in the `resources` section of your Stainless config.
+
+* A **method** is a function that makes an API request.
+* A **model** represents a type that can be reused throughout your SDKs.
+* A **resource** is a collection of functions and methods. It translates to a class in the SDKs for most languages.
+* A resource can also contain nested **subresources** with their own methods, models, and subresources.
+
+Here's a simple SDK usage example for a todo list API. It's annotated to show how methods, models, and resources from your Stainless config correspond to entities in your SDK.
+(We'll look at the config itself next.)
+
+
+<Tabs>
+  <TabItem label="TypeScript">
+```ts
+import { Task, TodoNinja } from "todo-ninja";
+
+const client = new TodoNinja()
+
+//   from `tasks` resource ┐
+//                         │
+//                         V
+const item: Task = client.tasks.create({
+//           ^                    ^
+//           |                    |
+//           |                    └ from `create` method
+//           |
+//           └ from `task` model
+	name: "Grocery shopping",
+	deadline: "2025-05-01"
+});
+
+//  from `tags` subresource of `tasks`
+//            │
+//            V
+client.tasks.tags.list(task_id)
+```
+  </TabItem>
+  <TabItem label="Python">
+```python
+from todo_ninja import Task, TodoNinja
+
+client = TodoNinja()
+
+#        from `tasks` resource
+#                    │        ┌ from `create` method
+#                    |        |
+#                    V        V
+item: Task = client.tasks.create(
+#      ^
+#      |
+#      └ from `task` model
+    name="Grocery shopping",
+    date=date.fromisoformat("2025-05-01"),
+)
+
+# from `tags` subresource of `tasks`
+#             │
+#             V
+client.tasks.tags.list(task_id)
+```
+  </TabItem>
+  <TabItem label="Go">
+```go
+client := todoninja.NewClient()
+
+var task* todoninja.Task // from `task` model
+var err error
+//  from `tasks` resource
+//                   |
+//                   V
+task, err = client.Tasks.New(context.TODO(), todoninja.TaskNewParams{
+//                       ^
+//                       └ from `create` method (more on method names below)
+  Deadline: todoninja.Time(time.Now()),
+  Name: "Grocery shopping",
+})
+
+// from `tags` subresource of `tasks`
+//            |
+//            V
+client.Tasks.Tags.List(context.TODO(), task_id)
+```
+  </TabItem>
+</Tabs>
+
+
+Now let's see how the `tasks` resource, `create` method, and `task` model are defined in the Stainless config.
+We'll just look at the `resources` section of the config for now:
+
+```yaml
+# Stainless config
+organization:
+  ...
+resources:
+  tasks:
+    models:
+      task: "#/components/schemas/Task" # Points to OpenAPI spec
+    methods:
+      create: post /v1/tasks
+      ...
+    subresources:
+      tags:
+        methods:
+          list: get /v1/tasks/{id}/tags
+...
+```
+
+:::note
+
+For more details on the other config sections, see below or consult the [Stainless config reference](/reference/config).
+
+:::
+
+
+There are three things to notice here:
+1. Names in your SDK are derived from the names in your Stainless config. The generator transforms these names to match each language's naming convention. For example, the `task` model becomes a `Task` type in Python and TypeScript. Similarly, a `blog_post` model would be renamed `BlogPost` in those languages.
+    <details>
+      <summary>Method names in Go</summary>
+
+      The Go SDK generator goes one step further. To follow Go's naming conventions, it translates the methods `create` and `retrieve` to the function names `New` and `Get`, respectively.
+    </details>
+2. Methods are mapped to API calls, so the `create` function in the examples above will send a `POST` request to `/v1/tasks`.
+3. Models in the Stainless config are mapped to schemas defined in the OpenAPI spec. In this example, the `task` model in the Stainless config points to the `Task` schema, which defines the `name` and `deadline` properties in the SDK:
+```yaml
+# OpenAPI Spec
+components:
+  schemas:
+    Task:
+      type: object
+      properties:
+        name:
+          type: string
+        deadline:
+          type: string
+          format: date
+```
+
+## Resources
+
+[[reference]](/reference/config#resource)
+
+We've already seen that a resource is a group of logically related methods, models, and subresources.
+Resources in your SDK typically correspond to REST resources in your API, but you can reorganize them depending on their intended usage.
+
+Consider the following:
+
+```yaml
+resources:
+  accounts:
+    models:
+      account: '#/components/schemas/Account'
+    methods:
+      list: get /accounts
+      create: post /accounts
+      retrieve: get /accounts/{account_id}
+      delete: delete /accounts/{account_id}
+      update: put /accounts/{account_id}
+    subresources:
+      friends:
+        models:
+          friends: '#/components/schemas/Friends'
+        methods:
+          list: get /accounts/{account_id}/friends
+          create: post /accounts/{account_id}/friends
+          delete: delete /accounts/{account_id}/friends/{friend_id}
+```
+
+In this example, we have an `accounts` resource and an `accounts.friends` resource nested within. The resulting SDK usage is:
+
+```python
+account = client.accounts.create(...)
+friends = client.accounts.friends.list(...)
+```
+
+Depending on the constraints and how you want your users to reason about your API, you may want to restructure the
+resources to look like:
+
+```yaml
+resources:
+  accounts:
+    models:
+      account: '#/components/schemas/Account'
+      friends: '#/components/schemas/Friends' # Moved here
+    methods:
+      list: get /accounts
+      create: post /accounts
+      retrieve: get /accounts/{account_id}
+      delete: delete /accounts/{account_id}
+      update: put /accounts/{account_id}
+      # Below items were moved here and renamed
+      list_friends: get /accounts/{account_id}/friends
+      add_friend: post /accounts/{account_id}/friends
+      remove_friend: delete /accounts/{account_id}/friends/{friend_id}
+```
+
+That resulting SDK usage is:
+
+```python
+account = client.accounts.create(...)
+friends = client.accounts.listFriends(...)
+```
+
+Which approach is better is ultimately up to how you want the user to reason about your API. In general, a good resource is a conceptually distinct, representational object in your API.
+
+You can also put methods at the client level by placing them under the special
+resource `$client`. If your resources looks like:
+
+```yaml
+resources:
+  $client:
+    methods:
+      health: get /health
+```
+
+Then the SDK usage would be:
+
+```python
+health = client.health()
+```
+
+{/* <!-- TODO expand on tips for good resource --> */}
+
+## Models
+[[reference]](/reference/config#model)
+
+A model maps a schema in your OpenAPI spec to a type in your SDK.
+If you want a schema to be represented by the same type throughout your SDK, you should define a model for it.
+
+For example, consider this snippet of a Stainless config:
+
+```yaml
+# Stainless config
+resources:
+  accounts:
+    methods:
+      list: get /accounts
+      create: post /accounts
+      retrieve: get /accounts/{account_id}
+```
+
+By default, the Stainless generator creates methods with roughly the following signatures, even if they
+all reference the same `#/components/schemas/Account` in their response. (Note the return types.)
+
+```ts
+class Accounts extends APIResource {
+    list(...): AccountListResponse[];
+    create(...): AccountCreateResponse;
+    retrieve(...): AccountRetrieveResponse;
+}
+
+// usage:
+const account: AccountRetrieveResponse = client.accounts.retrieve()
+```
+
+Let's see what happens when we define an `account` model in the `accounts` resource:
+
+```yaml
+resources:
+  accounts:
+    models:
+      account: '#/components/schemas/Accounts'
+    methods:
+      list: get /accounts
+      create: post /accounts
+      retrieve: get /accounts/{account_id}
+```
+
+Now the Stainless generator will create these methods:
+
+```ts
+class Accounts extends APIResource {
+    list(...): Account[];
+    create(...): Account;
+    retrieve(...): Account;
+}
+
+// usage:
+const account: Account = client.accounts.retrieve()
+```
+
+### Configuring a Model
+
+A model doesn't have to use a schema from `#/components/schemas/*`. It can refer to a schema anywhere in your OpenAPI spec using a full [JSON Reference](https://swagger.io/docs/specification/using-ref/) from the root.
+
+For schemas under `#/components/schemas/*`, you don't need to specify the whole JSON reference; you can just use the last path segment.
+For example, in the Stainless config example above, instead of
+
+```yaml
+    models:
+      account: '#/components/schemas/Accounts'
+```
+
+you could use:
+
+```yaml
+    models:
+      account: Accounts
+```
+
+:::note
+Your schemas could have `$ref`s, or be entirely inline, or a mix of both---it
+won't affect the names that we use. This means you can refactor your OpenAPI
+spec without worrying about breaking changes.
+:::
+
+The model configuration can also accept more options, if you need them. Please check out our [full reference docs here](/reference/config).
+
+### When to Define a Model
+In general, you should define models for the "nouns" in your API: the objects your API operations create, read, update, and delete. But there aren't hard and fast rules about which schemas you should define models for.
+
+For example, suppose your OpenAPI spec defines `User` and `Address` schemas, and a `User` has a nested `Address` property. Whether you should define a model for `Address` depends on how it's used in your API.
+
+These rules of thumb can help you decide when to define a model:
+
+1. Each resource in your Stainless config should have a corresponding model. In the example above, `accounts` includes an `account` model.
+2. Use the "rule of three": if a schema is used in three or more places in your OpenAPI spec, it should probably be a model.
+    <details>
+      <summary>Exception:</summary>
+
+    Don't define a model if you expect these uses to diverge later, to avoid breaking changes to your SDK.
+    Let's say you have a pet store API with `Dog` and `Cat` schemas that includes a `careInstructions` property. Right now `careInstructions` only includes the pet's meal schedule, but eventually the `careInstructions` property on dogs might also include their walk schedule.
+    If we define a `CareInstructions` model, the SDK will look like this:
+      ```ts
+      type Dog {
+        ...
+        care_instructions: CareInstructions
+      }
+
+      type Cat {
+        ...
+        care_instructions: CareInstructions
+      }
+
+      type CareInstructions {
+        daily_meals: number
+      }
+      ```
+
+      We're better off _not_ defining a model, so the SDK looks like this:
+      ```ts
+      type Dog {
+        ...
+        care_instructions: { daily_meals: number }
+      }
+
+      type Cat {
+        ...
+        care_instructions: { daily_meals: number }
+      }
+      ```
+    </details>
+3. Pay attention to the suggestions from the autoguesser and diagnostics in SDK Studio. The autoguesser will try to define models where appropriate, and SDK Studio will make suggestions about schemas that could be defined as models.
+4. Most importantly, use your best judgment. Define a model whenever it will make your SDK more usable and more readable, even if it violates these rules of thumb.
+
+### Shared Models
+
+In general, a model belongs under the most closely related resource, and each resource
+should have at least one model. All of our SDKs are designed so that you can put a model where it most
+logically belongs without worrying about dependency issues.
+
+There are cases where a model doesn't belong under one resource. A common example of
+that might be something like `#/components/schemas/Address` or `#/components/schemas/Contact`. We have a
+special resource called `$shared` where these kinds of models should be defined.
+
+```yaml
+resources:
+  $shared:
+    models:
+      address: '#/components/schemas/Address'
+      contact: '#/components/schemas/Contact'
+```
+
+## Methods
+
+[[reference]](/reference/config#method)
+
+Methods in the Stainless config translate to functions in your SDK that make API calls.
+Usually, you only need to specify the endpoint the function will call (including HTTP method):
+
+```yaml
+resources:
+  accounts:
+    methods:
+      list: get /accounts
+```
+
+You can include more properties to configure the method in more detail:
+
+```yaml
+resources:
+  accounts:
+    methods:
+      list:
+        type: http
+        endpoint: get /accounts
+        deprecated: Use the /user endpoint instead
+```
+
+For standard CRUD operations, we recommend using these common method names: `create`, `update`, `delete`, `retrieve`, and `list`.
+
+{/* <!-- TODO Features such as language-specific deprecation, alias methods, pagination configuration, and webhook
+methods and more can be found at the [full reference docs here](#). --> */}
+
+## Authentication
+
+[[reference]](/reference/config#client-opt)
+
+The Stainless Generator defines your SDK's authentication using the [`#/security` and `#/components/securitySchemes`](https://swagger.io/docs/specification/authentication/) particulars from your OpenAPI spec. By default, Stainless SDKs are set to authenticate using an environment variable:
+
+```yaml
+client_settings:
+  opts:
+    auth_token:
+      type: string
+      # Whether this client option is required to instantiate the client:
+      nullable: false
+      # Whether this value should be read from an env:
+      read_env: ORG_AUTH_TOKEN
+      auth: { security_scheme: BearerAuth }
+
+# optional, overrides the OpenAPI spec's top-level security key, required if it isn't present
+security:
+  - BearerAuth: []
+```
+
+For more complicated authentication schemes, or should the Stainless Generator fail to configure yours correctly, see the examples below.
+
+The Stainless generator uses the top-level `security` as the security configuration supported by the SDKs, but
+you may want to specify a different combination of `security` than the one used in your OpenAPI spec. The
+`security` and `security_schemes` in the Stainless config overrides the values in the spec.
+
+<div className="details-group">
+<details>
+<summary>HTTP Bearer <code>Authorization: Bearer &lt;bearer-token&gt;</code></summary>
+
+The [HTTP Bearer](https://swagger.io/docs/specification/authentication/bearer-authentication/) authentication
+method is configured like so:
+
+```yaml
+# OpenAPI
+components:
+  security_schemes:
+    MyBearerAuth:
+      type: http
+      scheme: bearer
+      # optional, documentation purpose only
+      bearerFormat: JWT
+
+security:
+  - MyBearerAuth: {}
+```
+
+```yaml
+# Stainless config
+client_settings:
+  opts:
+    my_bearer_token: # or `token`, `bearer_token`, `api_key`, etc.
+      type: string
+      read_env: ORG_BEARER_TOKEN
+      auth: { security_scheme: MyBearerAuth }
+```
+
+</details>
+
+<details>
+<summary>HTTP Basic <code>Authorization: Basic &lt;base64(username:password)&gt;</code></summary>
+
+The [HTTP Basic](https://swagger.io/docs/specification/authentication/basic-authentication/) authentication
+method is configured like so:
+
+```yaml
+# OpenAPI
+components:
+  security_schemes:
+    MyBasicAuth:
+      type: http
+      scheme: basic
+
+security:
+  - MyBasicAuth: {}
+```
+
+```yaml
+# Stainless config
+client_settings:
+  opts:
+    my_username:
+      type: string
+      read_env: ORG_MY_USERNAME_TOKEN
+      auth: { security_scheme: MyBasicAuth, role: 'username' }
+    my_password:
+      type: string
+      read_env: ORG_MY_PASSWORD_TOKEN
+      auth: { security_scheme: MyBasicAuth, role: 'password' }
+```
+
+</details>
+
+<details>
+<summary>API Key <code>&lt;Header&gt;: &lt;API Key&gt;</code></summary>
+
+An [API key in a header](https://swagger.io/docs/specification/authentication/api-keys/) authentication method
+is configured like so:
+
+```yaml
+# OpenAPI
+components:
+  security_schemes:
+    MyApiKeyAuth:
+      type: apiKey
+      name: My-Api-Key
+      in: header
+
+security:
+  - MyApiKeyAuth: {}
+```
+
+```yaml
+# Stainless config
+client_settings:
+  opts:
+    my_api_key: # or `token`, `auth_token`, etc.
+      type: string
+      read_env: ORG_API_KEY_TOKEN
+      auth: { security_scheme: MyApiKeyAuth }
+```
+
+</details>
+
+<details>
+<summary>Optional Auth</summary>
+
+To specify that you accept no authentication, declare a security configuration with no properties like so:
+
+```yaml
+security:
+  - BearerAuth: {}
+  - {}
+```
+
+</details>
+
+<details>
+<summary id="oauth2">OAuth2</summary>
+
+Stainless doesn't generate code to handle initial OAuth authorization or token management for you. To handle authorization and managing tokens, you typically want to point your users to one of [the existing OAuth SDKs here](https://oauth.net/code/). We expect to offer out-of-the-box codegen support for OAuth in the future. [Please reach out](mailto:feedback@stainless.com) if this is of interest.
+
+Stainless does support endpoints that use OAuth-generated access tokens for authorization. In most cases, you just need to update your Stainless configuration to specify that authentication is happening via Bearer Authentication.
+
+```yaml
+# openapi.yml
+
+securitySchemes:
+  OAuth2:
+    type: oauth2
+    description: OAuth2 security scheme
+    flows:
+      authorizationCode:
+        authorizationUrl: https://my_auth_url.com/
+        tokenUrl: https://my_token_url.com/
+        scopes:
+          read_only: read only
+          write_only: write only
+```
+
+```yaml
+# Stainless config
+
+client_settings:
+  opts:
+    access_token:
+      type: string
+      auth:
+        security_scheme: BearerAuth
+      read_env: MY_TEAM_ACCESS_TOKEN
+
+security:
+  - BearerAuth: []
+
+security_schemes:
+  BearerAuth:
+    type: http
+    scheme: bearer
+```
+
+Please [reach out](mailto:support@stainless.com) if you need help supporting your configuration.
+
+</details>
+</div>
+
+## `README.md` configuration
+
+[[reference]](/reference/config#readme)
+
+We currently support configuration of the various code snippets in the `README.md` of a generated SDK.
+
+```yaml
+readme:
+  example_requests:
+    default:
+      type: request
+      endpoint: post /cards
+      params:
+        type: SINGLE_USE
+    headline:
+      type: request
+      endpoint: put /cards
+      params:
+        type: SINGLE_USE
+        account_id: 123
+    pagination:
+      type: request
+      endpoint: get /cards
+      params:
+        limit: 30
+```
+
+The `headline` example is the first usage of the API that your users see in the `README.md`, so it should
+be the most 'important' endpoint in your API.
+
+The `pagination` example is required if you have configured pagination, and should point to a paginated
+endpoint.
+
+The `default` example is inherited by all other example requests, though you can manually override them if
+there is a need to do so. Because of this, we suggest that you choose the most 'standard' endpoint in your
+API.
+
+## Pagination
+
+[[reference]](/reference/config#pagination)
+
+Configuring pagination with Stainless SDKs generates a helper to fetch the next page and an auto-iterator
+to easily loop through items in your API. The helper makes it easy to manually paginate when needed and the
+auto-iterator makes consuming a list as natural as a for loop, with the iterator automatically fetching the
+next page when needed:
+
+```ts
+const iter: OffsetPage<Account> = await client.accounts.list()
+
+for await (const account in iter) {
+  if (account.name === 'Michael') {
+    console.log(account.id)
+  }
+}
+```
+
+### Pagination Scheme
+
+To configure pagination, you need to first define a _pagination scheme_. A pagination scheme is closely related to the pagination class that is generated in the SDKs, and is made up of:
+
+```yaml
+pagination:
+  - name: <name of page class>
+    type: <offset, cursor, cursor_id, page_number, etc.>
+    request:
+      <name of request parameter>: <schema of request parameter>
+    response:
+      <name of response field>: <schema of response field>
+    param_location: <query, body> # optional, defaults to query
+```
+
+1. the type of pagination (`offset`, `cursor`, `cursor_id`, etc...)
+1. the parameters in the `request`
+1. the fields in the `response` that you expect to see on every paginated method of this type
+1. the location in the request where the pagination parameters should be set
+
+The `request` and `response` sections are used to generate the pagination classes which depending on the
+language is represented as a generic class, interface, or object. They should respectively contain keys of the
+request parameters and response JSON in your API, for example in the header, query, or the body.
+
+You should include request parameters that are necessary for pagination, such as `page_number`, `page_size`,
+`after`, `limit`, and properties that should always be present in the response, like `data` or `items` (which
+contains the list of elements you have).
+
+You may also include parameters that aren't strictly necessary for pagination to work. For example, it might
+be appropriate to add a request parameter like `sort_by`, which might be an enum of the ways you can sort
+across your API.
+
+### Pagination Type
+
+The first step in configuring pagination is to define the type of pagination your API is using. The types of pagination Stainless supports are:
+
+- `offset`: A simple pagination scheme that uses an offset (the number of entries to skip) and limit (number of elements to fetch) to paginate through a list of items.
+- `page_number`: Similar to offset pagination, but instead of an offset, which indexes on the items, `page_number` indexes on chunks of elements to skip.
+- `cursor`: A pagination scheme that uses a cursor (a string or a number to indicate the element to start from) to paginate through a list of items.
+- `cursor_id`: Similar to cursor pagination, but the cursor comes from an id property of the response items.
+- `cursor_url`: A pagination scheme that simply returns a URL to fetch from to retrieve the next page of results.
+
+:::note
+
+If you haven't yet built pagination for your API and are unsure which type of pagination to use, we recommend using `cursor_id` pagination as it is typically more robust and performant than offset or page number pagination.
+
+:::
+
+<details>
+<summary>Cursor ID Pagination</summary>
+
+```yaml
+pagination:
+  - name: my_cursor_id_page
+    type: cursor_id
+    request:
+      starting_after:
+        type: string
+        x-stainless-pagination-property:
+          purpose: next_cursor_id_param
+      ending_before:
+        type: string
+        x-stainless-pagination-property:
+          purpose: previous_cursor_id_param
+      limit:
+        type: integer
+    response:
+      my_data:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: string
+              x-stainless-pagination-property:
+                purpose: cursor_item_id
+          required:
+            - id
+```
+
+<details>
+<summary>Example OpenAPI Specification</summary>
+
+```yaml
+openapi: 3.1.0
+paths:
+  /accounts:
+    get:
+      parameters:
+        - name: starting_after
+          in: query
+          schema:
+            type: string
+        - name: ending_before
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 'success!'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  my_data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+```
+
+</details>
+</details>
+
+<details>
+<summary>Cursor Pagination</summary>
+
+```yaml
+pagination:
+  - name: my_cursor_page
+    type: cursor
+    request:
+      next:
+        type: string
+        x-stainless-pagination-property:
+          purpose: next_cursor_param
+      limit:
+        type: integer
+    response:
+      my_data:
+        type: array
+        items:
+          type: object
+      next:
+        type: string
+        x-stainless-pagination-property:
+          purpose: next_cursor_field
+```
+
+<details>
+<summary>Example OpenAPI Specification</summary>
+
+```yaml
+openapi: 3.1.0
+paths:
+  /accounts:
+    get:
+      parameters:
+        - name: next
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 'success!'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  my_data:
+                    type: array
+                    items:
+                      type: object
+                  next:
+                    type: string
+```
+
+</details>
+</details>
+
+<details>
+<summary> Offset Pagination</summary>
+:::note
+Note: While creating APIs with offset pagination is often simpler to implement, they can often end up being a source of problems for both you and your users. Consider:
+- If new resources are simultaneously being created or deleted that fall in the middle of the list based on the sort, you run the risk of missing or double scanning objects as you paginate through results.
+- Many database engines have poor performance for large offset values, since they often have to scan through the entire table to get to the offset.
+
+If you can, we'd recommend cursor-id-based pagination, which is more robust and performant.
+:::
+
+```yaml
+pagination:
+  - name: my_offset_page
+    type: offset
+    request:
+      my_offset:
+        type: integer
+        description: The number of elements to skip.
+        # this tells us to modify this param when getting the next page
+        x-stainless-pagination-property:
+          purpose: offset_count_param
+      my_limit:
+        type: integer
+        description: The maximum number of elements to fetch.
+    response:
+      my_data:
+        type: array
+        items:
+          type: object
+      my_total:
+        type: integer
+        x-stainless-pagination-property:
+          # total number of elements in the list
+          purpose: offset_total_count_field
+      my_count:
+        type: integer
+        x-stainless-pagination-property:
+          # where to start the next page
+          purpose: offset_count_start_field
+```
+
+<details>
+<summary>Example OpenAPI Specification</summary>
+
+```yaml
+openapi: 3.1.0
+paths:
+  /accounts:
+    get:
+      parameters:
+        - name: my_offset
+          in: query
+          schema:
+            type: integer
+        - name: my_limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  my_data:
+                    type: array
+                    items:
+                      type: object
+                  my_total:
+                    type: integer
+                  my_count:
+                    type: integer
+```
+
+</details>
+</details>
+
+<details>
+<summary>Page Number Pagination</summary>
+:::note
+Note: While creating APIs with page-number pagination is often simpler to implement, they can often end up being a source of problems for both you and your users. Consider:
+- If new resources are simultaneously being created or deleted that fall in the middle of the list based on the sort, you run the risk of missing or double scanning objects as you paginate through results.
+- Many database engines have poor performance for large offset values, since they often have to scan through the entire table to get to the offset.
+
+If you can, we'd recommend cursor-id-based pagination, which is more robust and performant.
+:::
+
+```yaml
+pagination:
+  - name: my_page_number_page
+    type: page_number
+    request:
+      page:
+        type: integer
+        x-stainless-pagination-property:
+          purpose: page_number_param
+      page_size:
+        type: integer
+    response:
+      data:
+        type: array
+        items:
+          type: object
+      page:
+        type: integer
+        x-stainless-pagination-property:
+          purpose: current_page_number_field
+      last_page:
+        type: integer
+        x-stainless-pagination-property:
+          purpose: total_page_count_field
+```
+
+<details>
+<summary>Example OpenAPI Specification</summary>
+
+```yaml
+openapi: 3.1.0
+paths:
+  /accounts:
+    get:
+      description: Example case for page_number pagination
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: page_size
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MyModel'
+                  last_page:
+                    type: integer
+                    description: The last page number
+                  page:
+                    type: integer
+                    description: The page number
+```
+
+</details>
+</details>
+
+<details>
+<summary>Cursor URL Pagination</summary>
+
+```yaml
+pagination:
+  - name: cursor_url_page
+    type: cursor_url
+    request:
+      page_size:
+        type: integer
+    response:
+      data:
+        type: array
+        x-stainless-pagination-property:
+          purpose: items
+      next:
+        type: string
+        x-stainless-pagination-property:
+          purpose: cursor_url_field
+          from_header: Link
+```
+
+<details>
+<summary>Example OpenAPI Specification</summary>
+
+```yaml
+openapi: 3.1.0
+paths:
+  /paginated/cursor_url:
+    get:
+      description: Test case for cursor_url pagination
+      parameters:
+        - name: page_size
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MyModel'
+                  next:
+                    type: string
+                    format: uri
+                    description: The URL for the next page
+                required:
+                  - data
+                  - next_page
+```
+
+</details>
+</details>
+
+### Multiple pagination schemes
+
+The `pagination` section accepts multiple pagination schemes. We match each endpoint against the defined
+pagination schemes by making sure the relevant request parameters/response fields exist for that endpoint
+and have the correct type.
+
+In cases where it's ambiguous or you want to explicitly assert that a method matches `my_offset_page`, you can
+provide `paginated: my_offset_page` and the generator reports an error if it doesn't match that specific page.
+
+See the [config reference for pagination](/reference/config#pagination) for various examples and edge
+cases.
+
+### Other Pagination Properties
+
+#### Retrieving pagination properties from headers
+
+If your API returns pagination values in headers, you can use the `from_header` property to specify the header to read the value from.
+
+```yaml
+pagination:
+  - name: page_cursor_from_headers
+    type: cursor
+    request: ...
+    response:
+      my_cursor:
+        type: string
+        nullable: true
+        x-stainless-pagination-property:
+          purpose: next_cursor_field
+          from_header: 'X-My-Cursor'
+```
+
+#### Retrieving pagination properties from nested items
+
+If your API returns pagination values nested within the response, you can configure Stainless to read them from the nested items.
+
+Example response:
+
+```json
+{
+  "data": {
+    "items": [{}, {}]
+  },
+  "pagination_object": {
+    "next_page": "next_page_cursor",
+    "previous_page": "previous_page_cursor"
+  }
+}
+```
+
+```yaml
+pagination:
+  - name: page_cursor_nested_items
+    type: cursor_id
+    request: ...
+    response:
+      data:
+        type: object
+        properties:
+          items:
+            x-stainless-pagination-property:
+              purpose: items
+            type: array
+            items: {}
+      pagination_object:
+        type: object
+        properties:
+          next_page:
+            type: string
+            x-stainless-pagination-property:
+              purpose: next_cursor_id_param
+          previous_page:
+            type: string
+            x-stainless-pagination-property:
+              purpose: previous_cursor_id_param
+```
+
+#### Top level arrays in response
+
+You can use the `is_top_level_array` property to indicate that the response is a top-level array.
+
+Example response:
+
+```json
+[
+  {
+    "id": 1,
+    "name": "Alice"
+  },
+  {
+    "id": 2,
+    "name": "Bob"
+  }
+]
+```
+
+```yaml
+pagination:
+  - name: top_level_array
+    type: offset
+    request: ...
+    response:
+      items:
+        type: array
+        items: {}
+        x-stainless-pagination-property:
+          is_top_level_array: true
+```
+
+{/* <!--
+
+## Custom error classes
+
+[[reference]](/reference/config#errors)
+
+Our SDKs come out of the box with error classes that help your users debug integrations quicker.
+
+If your API returns structured JSON error objects, you can define custom error classes that provide the same
+debugging utilities, but with typed access to fields that your API returns and idiomatic subclassing (based on
+the language).
+
+Before you configure this feature, you will need two things:
+
+1. The API must return an error object which has
+
+   - a property that represents the kind of error.
+
+   - a property that represents the status code of the response
+
+   - (recommended) a property that represents the "message" of the error.
+
+2. A schema in your OpenAPI spec with a union of the error types your API will return, e.g.
+
+   ```yaml
+   components:
+     schemas:
+       Errors:
+         discriminator: error_type
+         oneOf:
+           - $ref: '#/components/schemas/InternalServerError'
+           - $ref: '#/components/schemas/PaymentError'
+
+       InternalServerError:
+         type: object
+         properties:
+           error_type:
+             const: 'AcmeInternalServerError'
+           error_detail:
+             type: string
+           error_status:
+             enum: [500]
+
+       PaymentError:
+         type: object
+         properties:
+           error_type:
+             const: 'AcmePaymentError'
+           error_detail:
+             type: string
+           error_status:
+             enum: [400]
+   ```
+
+   Note that the OpenAPI `discriminator` property is required, and that it must point to the property that
+   represents the kind of error' mentioned above.
+
+This will give us the information to either match based on both the 'type' parameter (from the OpenAPI spec)
+and 'status' parameter (from the stainless config) we'd expect.
+
+```yaml
+errors:
+  union:
+    source: '#/components/schemas/Error'
+    status_property: error_status
+  message_property: error_detail
+```
+
+## Webhooks
+--> */}
+
+## Client
+
+### Extra client arguments
+
+[[reference]](/reference/config#client-opt)
+
+You can define extra client arguments, which generally appears as an extra argument on the client
+constructor of each SDK (in Go, it appears as an extra `RequestOption`). These are generally used for
+supplying values for [authentication methods](#authentication), but can be also used for extra headers and
+more.
+
+```yaml
+client_settings:
+  opts:
+    pet_store_version:
+      type: string # can be a string, boolean, or a number
+      nullable: true # makes this an optional argument
+      default: v3 # the default pet store version to use
+
+      read_env: PETSTORE_VERSION
+      send_in_header: 'X-Petstore-Version'
+```
+
+```ts
+const client = new Petstore({
+  apiKey: '...',
+  petStoreVersion: 'v2', // sends 'X-Petstore-Version: v2'
+});
+```
+
+### Default headers
+
+[[reference]](/reference/config#client-settings)
+
+Default headers are headers we add to every request made by the SDK. We send platform headers so that you can
+collect metrics on the languages and platforms your users use. For all SDKs, we send the following:
+
+| Headers                       | Description                                                                                                                             |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `X-Stainless-Arch`            | The architecture, such as `x32`, `x64`, `arm`, `aarch64`, or `other:xxx`.                                                               |
+| `X-Stainless-Lang`            | The language, such as `typescript`, `python`, `java`, `kotlin`, or `go`.                                                                      |
+| `X-Stainless-OS`              | The OS, such as `Android`, `MacOS`, `Windows`, `FreeBSD`, `OpenBSD`, `Linux`, or `Other:xxx`.                                           |
+| `X-Stainless-Package-Version` | The package version, such as `v2.3.1`.                                                                                                  |
+| `X-Stainless-Read-Timeout`    | The timeout, in seconds, between receiving response chunks, such as `3`. Not sent if no read timeout is configured.                     |
+| `X-Stainless-Retry-Count`     | Which retry number the request is for, such as `0` for the first request, `1` for the first retry, `2` for the second retry, and so on. |
+| `X-Stainless-Runtime`         | The runtime, such as `node` or `CPython`.                                                                                               |
+| `X-Stainless-Runtime-Version` | The runtime version, such as `v14.8.0`.                                                                                                 |
+| `X-Stainless-Timeout`         | The timeout, in seconds, for the entire request, such as `10`. Not sent if no overall timeout is configured.                            |
+
+We also send some extra headers for each language:
+
+| Python Headers      | Description                                |
+| ------------------- | ------------------------------------------ |
+| `X-Stainless-Async` | Whether or not the `AsyncClient` was used. |
+
+| Java/Kotlin Headers      | Description                     |
+| ------------------------ | ------------------------------- |
+| `X-Stainless-OS-Version` | The OS version, such as `14.4`. |
+
+For requests made by a Stainless-generated MCP server, we will also send some extra headers:
+
+| MCP Headers        | Description    |
+|--------------------|----------------|
+| `X-Stainless-MCP`  | Always `true`. |
+
+### Retries
+
+Our clients retry connection errors (for example, a network connectivity problem), 408 Request Timeout, 409
+Conflict, 429 Rate Limit, and >=500 Internal errors.
+
+By default, our clients retry 2 times (so a total of 3 requests) using the [exponential backoff
+strategy](https://aws.amazon.com/builders-library/timeouts-retries-and-backoff-with-jitter/) with
+an initial delay of 0.5s and a max delay of 8s. We also add a jitter of 25% to spread out requests.
+
+This can be configured by you for your users:
+
+```yaml
+client_settings:
+  default_retries:
+    # 5 retries are made, with the interval [1, 2, 4, 8, 10 (capped by the max)]
+    # not accounting for jitter
+    max_retries: 5
+    initial_delay_seconds: 1
+    max_delay_seconds: 10
+```
+
+Or it can be changed by the user in each language's SDK:
+
+```ts
+client = new Petstore({
+  maxRetry: 3,
+});
+```
+
+Each request includes an `X-Stainless-Retry-Count` header so you know how often clients retry. See [Default headers](#default-headers) for details.
+
+#### Disabling retries
+
+Retries can be disabled in two ways. Your users can disable this at at the client level by setting max_retries to 0. For example:
+
+```ts
+client = new Petstore({
+  maxRetry: 0, // Doesn't retry at all
+});
+```
+
+Alternatively, your API can direct our SDKs to not retry by sending the [`X-Should-Retry`](#x-should-retry) header in your responses.
+
+#### `Retry-After` and `Retry-After-Ms`
+
+Our SDKs also respect [the `Retry-After`
+header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Retry-After) sent by the API, which defines
+in integers how many seconds we should wait before making another request. We also support the
+`Retry-After-Ms` header which is less standard but gives more fine-grained control over timings in
+milliseconds.
+
+The clients only respect values that are "reasonable" which are positive values less than a minute.
+
+#### `X-Should-Retry`
+
+Additionally, the clients support the `X-Should-Retry` header, which can be used to explicitly control whether
+a request should be retried. This header must be explicitly set to either `X-Should-Retry: true` or
+`X-Should-Retry: false` to be used as an override.
+
+When set to `true`, it forces a retry attempt even if the request would not normally be retried based on the
+default retry rules. When set to `false`, it prevents a retry attempt even if the request would normally be
+retried. If the header is not present or set to any other value, the default retry behavior is used.
+
+We recommend using the header over other methods to control the retry behavior on special status codes or
+other situations specific to your API, as it can be used by all consumers of the API and can be configured
+independently of the version of the SDK.
+
+### Timeouts
+
+[[reference]](/reference/config#client-settings)
+
+In addition to retries, our clients also have a default timeout of 60 seconds, which can be configured.
+
+```yaml
+client_settings:
+  default_timeout: PT60S # ISO8601 or number of milliseconds. This is 60 seconds
+```
+
+### Idempotency key
+
+[[reference]](/reference/config#client-settings)
+
+[Idempotency Keys](https://stripe.com/docs/api/idempotent_requests) can prevent errors where multiple retried
+requests are interpreted as separate requests. Our clients [retry connection errors and certain status codes](#retries)
+by default to create robust integrations, so we recommend that your API supports idempotency keys, especially for critical endpoints.
+
+You can configure idempotency keys by specifying `client_settings.idempotency` like so:
+
+```yaml
+client_settings:
+  idempotency:
+    header: 'Idempotency-Key' # or a header you prefer, like 'X-Request-Id'
+```
+
+We send the configured header with a value in the format `stainless-retry-{random_uuid}` on all
+non-`GET` requests. This header is also possible to override in every SDK that we generate.
+
+### File uploads
+
+Our SDKs support file uploads out of the box, via `multipart/form-data` requests.
+
+File parameters can be defined in the OpenAPI spec by specifying a `multipart/form-data` request with
+parameters that are `type: string` and `format: binary`.
+
+```yaml
+paths:
+  /files:
+    post:
+      summary: Upload a file
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: The file to upload
+                file_metadata:
+                  type: string
+                  description: >
+                    Some other property that you can add, serialized as a field in
+                    multipart/form-data
+              required:
+                - file
+      responses:
+        '200':
+          description: File uploaded successfully
+```
+
+Each SDK provides convenient ways to handle file uploads appropriate for that language. Below is an example in
+TypeScript:
+
+```ts
+await client.files.create({ file: fs.createReadStream('./local-file.txt'), 'content.txt') });
+// or
+await client.files.create({ file: new File(['my bytes'], 'content.txt') });
+```
+
+Similar helpers exist in other languages. For example:
+
+```python
+with open('content.txt', 'rb') as f:
+    client.files.create(file=f)
+```
+
+See the README.md of each SDK for language-specific documentation.
+
+{/* <!--
+### Custom casings
+
+### Query parameter style
+
+### Organization
+
+### Environments
+
+### Snippet Decoration
+
+### Preloadable parameters
+
+### Changelogs
+--> */}
+
+## Enterprise
+
+### OpenAPI transformations
+
+If your OpenAPI is not perfect and/or hard to modify because it's generated, we can work with you to identify
+problems in your OpenAPI spec and fix issues on our end with OpenAPI transforms. [Contact our
+sales](mailto:sales@stainless.com).
+
+### SSE streaming
+
+Configuring SSE streaming is supported by Stainless for enterprise customers. When configured, we will generate ergonomics bindings for your users to
+consume streams ergonomically and conveniently, for example in `for await` loops and more. [Contact our
+sales](mailto:sales@stainless.com).
+
+We can also help write and design helpers to make your streamed APIs more powerful for your users.

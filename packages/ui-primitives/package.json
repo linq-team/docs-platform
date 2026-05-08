@@ -1,0 +1,63 @@
+{
+  "name": "@stainless-api/ui-primitives",
+  "version": "1.0.0-beta.54",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "lint": "eslint --flag unstable_native_nodejs_ts_config .",
+    "check:types": "tsc --noEmit",
+    "build": "tsdown",
+    "clean": "rm -rf dist",
+    "prepack": "npm run clean && npm run build && cp package.json package.json.bak && node --experimental-strip-types ../../scripts/remove-development-condition-prepack.ts",
+    "postpack": "mv package.json.bak package.json"
+  },
+  "peerDependencies": {
+    "react": ">=19.0.0",
+    "react-dom": ">=19.0.0"
+  },
+  "dependencies": {
+    "clsx": "catalog:",
+    "lucide-react": "catalog:"
+  },
+  "devDependencies": {
+    "@stainless/eslint-config": "workspace:*",
+    "@tsdown/css": "catalog:",
+    "@types/react": "catalog:",
+    "react": "catalog:",
+    "sass": "^1.99.0",
+    "tsdown": "catalog:",
+    "typescript": "catalog:"
+  },
+  "exports": {
+    ".": {
+      "development": "./src/index.ts",
+      "default": "./dist/index.js"
+    },
+    "./scripts": {
+      "development": "./src/scripts/index.ts",
+      "default": "./dist/scripts/index.js"
+    },
+    "./styles.css": {
+      "development": "./src/styles.css",
+      "default": "./dist/styles.css"
+    },
+    "./starlight-compat.css": {
+      "development": "./src/styles/starlight-compat.css",
+      "default": "./dist/styles/starlight-compat.css"
+    },
+    "./*": {
+      "development": "./src/*",
+      "default": "./dist/*"
+    },
+    "./icons": {
+      "development": "./src/components/icons/index.tsx",
+      "default": "./dist/components/icons/index.js"
+    }
+  }
+}

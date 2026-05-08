@@ -1,0 +1,196 @@
+/* Typography - Stainless */
+@layer stl-ui.tokens {
+  :root {
+    --stl-typography-font: 'Geist', system-ui, sans-serif;
+    --stl-typography-font-mono: 'Geist Mono', ui-monospace, monospace;
+    --stl-typography-font-heading: var(--stl-typography-font);
+
+    --stl-typography-line-height: 1.5;
+    --stl-typography-line-height-heading: 1.2;
+
+    --stl-typography-text-body: var(--stl-typography-scale-base);
+    --stl-typography-text-body-sm: var(--stl-typography-scale-sm);
+    --stl-typography-text-body-xs: var(--stl-typography-scale-xs);
+
+    --stl-typography-text-code: max(0.875em, var(--stl-typography-scale-xs));
+
+    --stl-typography-text-h1: var(--stl-typography-scale-5xl);
+    --stl-typography-text-h2: var(--stl-typography-scale-4xl);
+    --stl-typography-text-h3: var(--stl-typography-scale-3xl);
+    --stl-typography-text-h4: var(--stl-typography-scale-2xl);
+    --stl-typography-text-h5: var(--stl-typography-scale-xl);
+    --stl-typography-scale-xs: 12px;
+    --stl-typography-scale-sm: 14px;
+    --stl-typography-scale-base: 16px;
+    --stl-typography-scale-lg: 18px;
+    --stl-typography-scale-xl: 20px;
+    --stl-typography-scale-2xl: 24px;
+    --stl-typography-scale-3xl: 29px;
+    --stl-typography-scale-4xl: 35px;
+    --stl-typography-scale-5xl: 42px;
+    --stl-typography-scale-6xl: 64px;
+
+    --stl-color-text-selection-foreground: /* unset by default; text colors are unchanged */;
+    --stl-color-text-selection-background: light-dark(
+      rgb(from var(--stl-color-text-selection) r g b / calc(alpha * 0.15)),
+      rgb(from var(--stl-color-text-selection) r g b / calc(alpha * 0.35))
+    );
+  }
+}
+
+/* Prose exists in its own sub-layer for easy reverting */
+body {
+  font-family: var(--stl-typography-font);
+}
+
+@scope (.stl-ui-prose) to (.stl-ui-not-prose) {
+  :scope {
+    letter-spacing: -0.01em;
+    font-weight: 400;
+    line-height: var(--stl-typography-line-height);
+    font-size: var(--stl-typography-text-body);
+    color: var(--stl-color-foreground-reduced);
+    &.small {
+      font-size: var(--stl-typography-scale-sm);
+      letter-spacing: normal;
+    }
+  }
+
+  :where(strong) {
+    color: rgb(from currentColor r g b / 1);
+  }
+
+  :where(a) {
+    color: var(--stl-color-link-foreground);
+    text-decoration-color: rgb(from currentColor r g b / calc(alpha * var(--stl-opacity-level-040)));
+    transition: text-decoration-color 0.1s ease-out;
+    &:hover {
+      text-decoration-color: currentColor;
+    }
+  }
+
+  /* headings */
+  :where(h1, h2, h3, h4, h5, h6) {
+    color: var(--stl-color-foreground);
+    font-weight: 500;
+    line-height: var(--stl-typography-line-height-heading);
+    font-family: var(--stl-typography-font-heading);
+    text-wrap: pretty;
+  }
+  :where(h1, h2, h3) {
+    text-wrap: balance;
+  }
+  :where(h1) {
+    font-size: var(--stl-typography-text-h1);
+    letter-spacing: -0.03em;
+    margin-top: 1.5em;
+  }
+  :where(h2) {
+    font-size: var(--stl-typography-text-h2);
+    letter-spacing: -0.03em;
+    margin-top: 1.35em;
+  }
+  :where(h3) {
+    font-size: var(--stl-typography-text-h3);
+    letter-spacing: -0.02em;
+    margin-top: 1.35em;
+  }
+  :where(h4) {
+    font-size: var(--stl-typography-text-h4);
+    letter-spacing: -0.02em;
+    margin-top: 1.35em;
+  }
+  :where(h5) {
+    font-size: var(--stl-typography-text-h5);
+    letter-spacing: -0.02em;
+    margin-top: 1.2em;
+  }
+  :scope.smaller-headings {
+    --stl-typography-text-h1: var(--stl-typography-scale-3xl);
+    --stl-typography-text-h2: var(--stl-typography-scale-2xl);
+    --stl-typography-text-h3: var(--stl-typography-scale-xl);
+    --stl-typography-text-h4: var(--stl-typography-scale-lg);
+    --stl-typography-text-h5: var(--stl-typography-scale-base);
+
+    :where(h1) {
+      margin-top: 1.5em;
+    }
+    :where(h2, h3, h4) {
+      margin-top: 1.25em;
+    }
+    :where(h5) {
+      margin-top: 1em;
+    }
+  }
+
+  /* lists */
+  :where(ol, ul) {
+    padding-left: 26px;
+  }
+  :where(li + li) {
+    margin-block-start: 8px;
+  }
+
+  /* all code (inline + block) */
+  :where(code) {
+    font-family: var(--stl-typography-font-mono);
+    font-feature-settings:
+      'ss01' on,
+      'ss03' on,
+      'ss04' on,
+      'ss06' on;
+
+    font-size: var(--stl-typography-text-code);
+    font-weight: inherit;
+    letter-spacing: normal;
+    white-space: pre;
+  }
+  /* inline code */
+  &:where(code:not(pre > code)) {
+    color: var(--stl-color-foreground);
+    padding: 0 0.2em;
+    background-color: rgb(from var(--stl-color-foreground) r g b / 0.1);
+    border-radius: 0.2em;
+  }
+  /* code blocks */
+  :where(pre:not(.expressive-code *)) {
+    padding: 12px 20px;
+    border-radius: var(--stl-ui-layout-border-radius-sml);
+    border: 1px solid var(--stl-color-border);
+    background-color: var(--stl-color-faint-background);
+    overflow: auto;
+    margin-bottom: 1rem;
+  }
+
+  /* block element spacing */
+  :where(ol, ul, aside, img, figure, details) {
+    margin-top: 16px;
+  }
+}
+
+/* _direct_ children of stl-ui-prose should get a margin-top by default for spacing. */
+:where(:is(.stl-ui-prose, .stl-ui-prose > .sl-markdown-content) > :not(:first-child)) {
+  margin-top: 16px;
+}
+
+:where(.stl-ui-not-prose) {
+  letter-spacing: initial;
+  font-weight: initial;
+  line-height: initial;
+  font-size: initial;
+  color: initial;
+}
+
+@layer starlight.content {
+  .stl-ui-prose .sl-markdown-content {
+    a,
+    a:hover {
+      color: revert-layer;
+    }
+  }
+}
+
+::selection {
+  background-color: var(--stl-color-text-selection-background);
+  color: var(--stl-color-text-selection-foreground);
+}

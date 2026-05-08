@@ -1,0 +1,12 @@
+test-specs/
+vendor/
+
+*.mdx
+*.md
+pnpm-lock.yaml
+spec.json
+eslint-suppressions.json
+.vscode/settings.json
+
+packages/docs-ui/package.json
+worker-configuration.d.ts

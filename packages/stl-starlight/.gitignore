@@ -1,0 +1,8 @@
+.env
+node_modules
+# vendor
+
+# macOS-specific files
+.DS_Store
+.astro/
+.turbo

@@ -1,0 +1,102 @@
+{
+  "name": "@stainless-api/docs",
+  "version": "1.0.0-beta.140",
+  "publishConfig": {
+    "access": "public"
+  },
+  "description": "",
+  "type": "module",
+  "exports": {
+    ".": "./stl-docs/index.ts",
+    "./plugin": "./plugin/index.ts",
+    "./plugin/middleware": "./plugin/middlewareBuilder/stlStarlightMiddleware.ts",
+    "./plugin/MiddlewareTypes": "./plugin/middlewareBuilder/stainlessMiddleware.d.ts",
+    "./plugin/languages": "./plugin/languages.ts",
+    "./stainless-docs/mintlify-compat": "./stl-docs/components/mintlify-compat/index.ts",
+    "./mintlify-compat.css": "./styles/mintlify-compat.css",
+    "./docs-config": "./stl-docs/loadStlDocsConfig.ts",
+    "./specs/fetchSpecSSR": "./plugin/specs/fetchSpecSSR.ts",
+    "./generate-docs-routes": "./plugin/helpers/generateDocsRoutes.ts",
+    "./components": "./stl-docs/components/index.ts",
+    "./components/scripts": "./stl-docs/components/scripts.ts",
+    "./components/Head": "./stl-docs/components/Head.astro",
+    "./components/PageFrame": "./stl-docs/components/PageFrame.astro",
+    "./components/PageTitle": "./stl-docs/components/PageTitle.astro",
+    "./components/ContentBreadcrumbs": "./stl-docs/components/ContentBreadcrumbs.tsx",
+    "./components/AIDropdown": "./stl-docs/components/AIDropdown.tsx",
+    "./components/Footer": "./stl-docs/components/Footer.astro",
+    "./components/Pagination": "./stl-docs/components/pagination/Pagination.astro",
+    "./og-image/components/OpenGraphImage": "./stl-docs/og-image/components/OpenGraphImage.tsx",
+    "./og-image/components/OpenGraphFunctionSignature": "./stl-docs/og-image/components/OpenGraphFunctionSignature.tsx",
+    "./schema-extension": "./stl-docs/schema-extension.ts",
+    "./chat": "./stl-docs/chat/docs-chat-handler.ts"
+  },
+  "scripts": {
+    "lint": "eslint --flag unstable_native_nodejs_ts_config . --max-warnings 0",
+    "sync": "astro sync",
+    "check:types": "astro check",
+    "test": "vitest run"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "packageManager": "pnpm@10.33.4",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "peerDependencies": {
+    "@astrojs/starlight": ">=0.38.0",
+    "takumi-js": ">=1.0.5",
+    "astro": ">=6.0.0",
+    "react": ">=19.0.0",
+    "react-dom": ">=19.0.0",
+    "vite": ">=7.3.1"
+  },
+  "peerDependenciesMeta": {
+    "takumi-js": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "@astrojs/markdown-remark": "^7.1.1",
+    "@astrojs/react": "catalog:",
+    "@markdoc/markdoc": "^0.5.7",
+    "@stainless-api/docs-search": "workspace:*",
+    "@stainless-api/docs-ui": "workspace:*",
+    "@stainless-api/sdk": "0.5.0",
+    "@stainless-api/ui-primitives": "workspace:*",
+    "@stainless/sdk-json": "latest",
+    "cheerio": "^1.2.0",
+    "clsx": "catalog:",
+    "dotenv": "catalog:",
+    "lucide-react": "catalog:",
+    "motion": "^12.38.0",
+    "node-html-parser": "^7.1.0",
+    "rehype-parse": "^9.0.1",
+    "rehype-remark": "^10.0.1",
+    "react-markdown": "^10.1.0",
+    "react-syntax-highlighter": "^16.1.1",
+    "remark-gfm": "^4.0.1",
+    "remark-github-alerts": "^0.1.1",
+    "remark-stringify": "^11.0.0",
+    "remend": "^1.3.0",
+    "shiki": "catalog:",
+    "unified": "^11.0.5"
+  },
+  "devDependencies": {
+    "@astrojs/check": "catalog:",
+    "@stainless/eslint-config": "workspace:*",
+    "takumi-js": "^1.1.2",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@types/react-syntax-highlighter": "^15.5.13",
+    "astro": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vitest": "^4.1.5",
+    "zod": "catalog:"
+  }
+}

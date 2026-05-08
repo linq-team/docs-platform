@@ -1,0 +1,31 @@
+{
+  "name": "dev-docs",
+  "type": "module",
+  "private": true,
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev --port 3000",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "sync": "astro sync",
+    "lint": "eslint --flag unstable_native_nodejs_ts_config . --max-warnings 0",
+    "check:types": "astro check"
+  },
+  "dependencies": {
+    "@astrojs/react": "catalog:",
+    "@astrojs/starlight": "catalog:",
+    "@stainless-api/docs": "workspace:*",
+    "astro": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "remark-custom-heading-id": "^2.0.0",
+    "sharp": "^0.34.5",
+    "takumi-js": "^1.1.2"
+  },
+  "devDependencies": {
+    "@astrojs/check": "catalog:",
+    "@stainless/eslint-config": "workspace:*",
+    "typescript": "catalog:"
+  }
+}

@@ -1,0 +1,14 @@
+/* For standalone usage of docs-ui */
+
+/*
+ * TODO: replace with real import once rolldown css support matures further
+ * This import gets bundled so this import will should need to be resolved at runtime
+ */
+@import '../../ui-primitives/dist/styles.css';
+
+@import './styles/resets.css';
+@import './styles/variables.css';
+@import './styles/primitives.css';
+@import './styles/main.css';
+@import './styles/sidebar.css';
+@import './styles/search.css';

@@ -1,0 +1,45 @@
+// Base
+type BaseMessage = { id: string };
+type BaseTextMessage = BaseMessage & { content: string };
+// User
+export type UserMessage = BaseTextMessage & { role: 'user' };
+// Assistant
+export type AssistantTextMessage = BaseMessage & {
+  role: 'assistant';
+  respondingTo: string;
+  messageType: 'text';
+  content: string;
+  isComplete: boolean;
+};
+export type AssistantToolCallMessage = BaseMessage & {
+  role: 'assistant';
+  respondingTo: string;
+  messageType: 'tool_use';
+  toolName: string;
+  input: Record<string, unknown> | undefined;
+};
+type AssistantDoneMessage = BaseMessage & {
+  role: 'assistant';
+  respondingTo: string;
+  messageType: 'done';
+  spanId: string;
+};
+type AssistantErrorMessage = BaseMessage & {
+  role: 'assistant';
+  respondingTo: string;
+  messageType: 'error';
+  errorMessage: string;
+};
+
+export type ChatMessage =
+  | UserMessage
+  | AssistantTextMessage
+  | AssistantToolCallMessage
+  | AssistantDoneMessage
+  | AssistantErrorMessage;
+
+export type ExamplePrompt = {
+  longPrompt: string;
+  shortPrompt: string;
+  icon: React.ComponentType;
+};

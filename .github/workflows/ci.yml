@@ -1,0 +1,159 @@
+name: Docs CI
+
+on:
+  push:
+
+env:
+  NODE_VERSION: '22'
+
+jobs:
+  lint:
+    runs-on: depot-ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up PNPM
+        uses: pnpm/action-setup@v6
+        with:
+          run_install: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Lint
+        run: pnpm lint
+
+  typecheck:
+    runs-on: depot-ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up PNPM
+        uses: pnpm/action-setup@v6
+        with:
+          run_install: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Typecheck
+        run: pnpm check:types
+
+  check-format:
+    runs-on: depot-ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up PNPM
+        uses: pnpm/action-setup@v6
+        with:
+          run_install: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Check format
+        run: pnpm check:format
+
+  knip:
+    runs-on: depot-ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up PNPM
+        uses: pnpm/action-setup@v6
+        with:
+          run_install: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Check for unused code
+        run: pnpm knip
+
+  test:
+    runs-on: depot-ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up PNPM
+        uses: pnpm/action-setup@v6
+        with:
+          run_install: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Test
+        run: pnpm test
+
+  build:
+    needs: [lint, typecheck, check-format, test, knip]
+    runs-on: depot-ubuntu-24.04
+    strategy:
+      matrix:
+        target:
+          - './packages/*'
+          - dev-docs
+          - ui-playground
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up PNPM
+        uses: pnpm/action-setup@v6
+        with:
+          run_install: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build ${{ matrix.target }}
+        run: pnpm run build --filter=${{ matrix.target }}
+        env:
+          STAINLESS_API_KEY: ${{ secrets.STAINLESS_API_KEY }}
+          PUBLIC_ALGOLIA_APP_ID: ${{ github.ref == 'refs/heads/main' && secrets.PUBLIC_ALGOLIA_APP_ID || '' }}
+          PUBLIC_ALGOLIA_INDEX: ${{ github.ref == 'refs/heads/main' && secrets.PUBLIC_ALGOLIA_INDEX || '' }}
+          PUBLIC_ALGOLIA_SEARCH_KEY: ${{ github.ref == 'refs/heads/main' && secrets.PUBLIC_ALGOLIA_SEARCH_KEY || '' }}
+          PRIVATE_ALGOLIA_WRITE_KEY: ${{ github.ref == 'refs/heads/main' && secrets.PRIVATE_ALGOLIA_WRITE_KEY || '' }}

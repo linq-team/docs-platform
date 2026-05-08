@@ -1,0 +1,27 @@
+---
+type Props = {
+  step: number;
+};
+
+const { step } = Astro.props;
+---
+
+<span class="stainless-step">{step}</span>
+
+<style>
+  .stainless-step {
+    align-items: center;
+    background-color: var(--stl-color-muted-background);
+    border-radius: 99%;
+    display: inline-flex;
+    justify-content: center;
+    margin-right: 0.5rem;
+  }
+</style>
+
+<style is:global>
+  h2 .stainless-step {
+    height: 2.5rem;
+    width: 2.5rem;
+  }
+</style>

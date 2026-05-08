@@ -1,0 +1,88 @@
+---
+import HeaderLinks from '../headers/HeaderLinks.astro';
+import { SidebarWithComponents } from './SidebarWithComponents';
+import SidebarPersister from '@astrojs/starlight/components/SidebarPersister.astro';
+import { convertAstroSidebarToStl } from './convertAstroSidebarToStl';
+import { StlSidebarEntry, StlSidebarGroup, StlSidebarLink } from '@stainless-api/docs-ui/components';
+import { LINK_GROUP_TITLES_TO_OVERVIEW_PAGES } from 'virtual:stl-docs-virtual-module';
+
+const { sidebar } = Astro.locals.starlightRoute;
+
+let stlSidebar = convertAstroSidebarToStl(sidebar);
+
+function extractOverviewPage(entry: StlSidebarGroup): {
+  overviewLink: StlSidebarLink | null;
+  remainingEntries: StlSidebarEntry[];
+} {
+  let overviewLink: StlSidebarLink | null = null;
+
+  const withoutOverview = entry.entries.filter((e) => {
+    if (e.type !== 'link') {
+      return true;
+    }
+    const overviewAttr = e.attrs?.['data-stldocs-overview'];
+    if (!overviewAttr) {
+      return true;
+    }
+    overviewLink = e;
+    return false;
+  });
+
+  return {
+    overviewLink,
+    remainingEntries: withoutOverview,
+  };
+}
+
+function linkGroupTitleToOverviewPages(sidebar: StlSidebarEntry[]): StlSidebarEntry[] {
+  return sidebar.map((entry) => {
+    if (entry.type === 'group') {
+      const { overviewLink, remainingEntries } = extractOverviewPage(entry);
+
+      // group only contained an overview link
+      if (overviewLink && remainingEntries.length === 0) {
+        return {
+          ...overviewLink,
+          label: entry.label, // keep the group label
+        };
+      }
+
+      // set the group target to the overview link target
+
+      let target = entry.target;
+      let isCurrent = entry.isCurrent;
+      let collapsed = entry.collapsed;
+      if (overviewLink) {
+        target = overviewLink.target;
+        isCurrent = overviewLink.isCurrent;
+        if (isCurrent) {
+          collapsed = false;
+        }
+      }
+
+      return {
+        ...entry,
+        entries: linkGroupTitleToOverviewPages(remainingEntries),
+        target,
+        isCurrent,
+        collapsed,
+      };
+    } else {
+      return entry;
+    }
+  });
+}
+
+// Since Terraform only renders the top level resource, we don't need to link group titles to overview pages.
+if (LINK_GROUP_TITLES_TO_OVERVIEW_PAGES === true && Astro.locals.language !== 'terraform') {
+  stlSidebar = linkGroupTitleToOverviewPages(stlSidebar);
+}
+---
+
+<div class="stl-sidebar-header-links">
+  <HeaderLinks />
+</div>
+<slot name="sdk-select" />
+<SidebarPersister>
+  <SidebarWithComponents entries={stlSidebar} withStarlightRestoration />
+</SidebarPersister>

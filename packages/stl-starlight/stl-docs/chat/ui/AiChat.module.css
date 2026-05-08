@@ -1,0 +1,591 @@
+:global(:root) {
+  --stl-chat-outer-padding: 1rem;
+  --stl-chat-width: min(40ch + var(--stl-chat-outer-padding) * 2, 100vw);
+}
+
+:global(:root):has(.outer-wrapper.presentation-panel) {
+  --stl-chat-panel-width: var(--stl-chat-width);
+}
+
+/* make some color variables transitionable */
+@property --shadow-color {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: transparent;
+}
+@property --chat-background-color {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: transparent;
+}
+
+.outer-wrapper {
+  display: grid;
+  max-height: calc(80svh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+  width: var(--stl-chat-width);
+
+  /* prettier-ignore */
+  grid:
+    'chat-area' minmax(0, 1fr)
+    'trigger'   auto
+    / auto;
+  row-gap: 0.65rem;
+
+  --trigger-size: 3rem;
+  padding: var(--stl-chat-outer-padding);
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + var(--stl-chat-outer-padding));
+  padding-right: calc(env(safe-area-inset-right, 0px) + var(--stl-chat-outer-padding));
+
+  font-size: var(--stl-typography-scale-sm);
+  color: var(--stl-color-foreground-reduced);
+  --base-shadow-color: light-dark(rgb(0 0 0 / 0.15), var(--stl-color-background));
+  --shadow-color: var(--base-shadow-color);
+  --chat-background-color: var(--stl-color-ui-background);
+
+  &.presentation-floating {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    z-index: 50;
+
+    pointer-events: none;
+    & > * {
+      pointer-events: all;
+    }
+    /* cover interstitial area while expanded but leave padding area clickable */
+    &:has(.trigger.expanded)::after {
+      content: '';
+      grid-area: 1 / 1 / -1 / -1;
+      pointer-events: all;
+      z-index: -1;
+      /* cover padding in the page-edge direction */
+      margin-right: calc(-1 * var(--stl-chat-outer-padding));
+      margin-bottom: calc(-1 * var(--stl-chat-outer-padding));
+    }
+  }
+
+  &.presentation-panel {
+    grid-area: chat;
+    padding-top: calc(env(safe-area-inset-top, 0px) + var(--stl-chat-outer-padding));
+    max-height: none;
+    position: sticky;
+    top: 0;
+  }
+}
+
+.trigger-outer {
+  position: relative;
+  z-index: 3;
+  grid-area: trigger;
+  justify-self: end;
+
+  --trigger-border-width: 1px;
+  padding: var(--trigger-border-width);
+  background-color: var(--stl-color-border);
+  display: block;
+  transition: background-color 0.1s ease;
+  /* reduce scrolling content flashing behind semi-transparent area */
+  backdrop-filter: blur(12px);
+
+  &:hover {
+    background-color: var(--stl-color-border-strong);
+  }
+
+  &:has(textarea:focus-visible) {
+    background-color: var(--stl-color-accent-border-strong);
+    transition: background-color 0.25s ease;
+  }
+
+  &:not(:has(.trigger.expanded)) {
+    cursor: pointer;
+  }
+}
+
+.trigger {
+  display: flex;
+  align-items: stretch;
+  min-height: var(--trigger-size);
+  min-width: var(--trigger-size);
+  position: relative;
+
+  background-color: var(--stl-color-background);
+  background-image: linear-gradient(to bottom, var(--chat-background-color), var(--chat-background-color));
+  color: var(--stl-color-foreground);
+  --trigger-padding: 0.5rem;
+  padding: var(--trigger-padding);
+
+  overflow: clip;
+
+  .bot-icon {
+    position: absolute;
+    --icon-size: 1.5rem;
+    top: calc(var(--trigger-size) / 2 - var(--icon-size) / 2);
+    left: calc(var(--trigger-size) / 2 - var(--icon-size) / 2);
+    width: var(--icon-size);
+    height: var(--icon-size);
+    pointer-events: none;
+  }
+
+  .expanded-contents {
+    display: flex;
+    gap: 0.2rem;
+    align-items: center;
+    user-select: none;
+    width: calc(
+      var(--stl-chat-width) - var(--stl-chat-outer-padding) * 2 - var(--trigger-border-width) * 2 -
+        var(--trigger-padding) * 2
+    );
+  }
+  &:not(.expanded) .expanded-contents {
+    position: absolute;
+    pointer-events: none;
+    textarea {
+      user-select: none;
+    }
+  }
+
+  textarea {
+    display: block;
+    resize: none;
+    flex: 1 1 0;
+    height: auto;
+
+    font-size: var(--stl-typography-scale-base);
+    line-height: 1.35;
+    padding: 0.25em 0.25em 0.25em 0.5em;
+
+    color: inherit;
+    background: none;
+
+    border: none;
+    user-select: initial;
+    &:focus-visible {
+      outline: none;
+    }
+  }
+
+  button[type='submit'] {
+    align-self: flex-end;
+
+    width: calc(var(--trigger-size) - var(--trigger-padding) * 2);
+    height: calc(var(--trigger-size) - var(--trigger-padding) * 2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+    border-radius: calc(var(--border-radius) - var(--trigger-padding) + 2px);
+
+    background-color: var(--stl-color-accent-inverse-background);
+    color: var(--stl-color-accent-inverse-foreground);
+
+    cursor: pointer;
+
+    svg {
+      width: 1.15rem;
+      height: 1.15rem;
+      * {
+        stroke-width: 2.25px;
+      }
+    }
+
+    &:disabled {
+      background-color: var(--stl-color-muted-background);
+      color: var(--stl-color-foreground);
+      opacity: 0.6;
+      cursor: default;
+    }
+  }
+}
+
+.chat-area-container {
+  position: relative;
+  z-index: 2;
+  grid-area: chat-area;
+  display: flex;
+  flex-direction: column;
+
+  animation: chat-area-container-enter 0.4s cubic-bezier(0.35, 1.5, 0.5, 1);
+  animation-delay: 0.2s;
+  animation-fill-mode: backwards;
+
+  padding: 1px; /* for the border */
+  background-color: var(--stl-color-border);
+  transition:
+    --shadow-color 0.35s ease,
+    background-color 0.35s ease;
+}
+.presentation-panel .chat-area-container {
+  animation-duration: 0s;
+  animation-delay: 0s;
+  grid-row: 1 / -1;
+  margin: calc(-1 * var(--stl-chat-outer-padding));
+  padding: 0 0 0 1px; /* only left border */
+  background-color: var(--stl-color-border-faint); /* border is lighter */
+}
+@keyframes chat-area-container-enter {
+  from {
+    opacity: 0;
+    scale: 0.8 0.65;
+    translate: 5% 8rem;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+    translate: 0 0;
+  }
+}
+
+.chat-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  &:global(.scrolls-up) {
+    /* scrolls up from bottom, not down from top */
+    flex-direction: column-reverse;
+  }
+
+  overflow-y: auto;
+  overflow-x: clip;
+  overscroll-behavior: contain;
+
+  --chat-area-padding: 1em;
+  padding: var(--chat-area-padding);
+
+  background-color: var(--stl-color-background);
+  background-image: linear-gradient(to bottom, var(--chat-background-color), var(--chat-background-color));
+  transition: --chat-background-color 0.25s ease;
+}
+.presentation-panel .chat-area {
+  /* Don’t color chat area when it‘s not floating */
+  --chat-background-color: transparent;
+  /* Move padding to scrollable, chat-area which now fills the full panel */
+  /* TODO: this shift messes up framer-motion layout correction a bit */
+  --chat-area-padding: var(--stl-chat-outer-padding);
+  padding-bottom: calc(var(--stl-chat-outer-padding) + var(--trigger-size) + 2rem);
+}
+/* Fade out at the bottom of the scroll */
+.presentation-panel .chat-area-container::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 1px; /* don’t cover border area */
+  width: calc(100% - var(--stl-chat-outer-padding)); /* don’t overlap scrollbar */
+  height: calc(var(--stl-chat-outer-padding) + var(--trigger-size) + 2rem);
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgb(from var(--stl-color-background) r g b / 0.65) 2rem,
+    rgb(from var(--stl-color-background) r g b / 0.9)
+  );
+  z-index: 3;
+  animation: fade-in 0.15s 0.25s ease;
+  animation-fill-mode: backwards;
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.chat-scroll-contents {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto 1fr;
+  gap: 1em;
+  align-items: start;
+  position: relative;
+}
+
+.chat-empty-state {
+  display: flex;
+  flex-direction: column;
+  padding: 1em 1em;
+  --chat-empty-state-gap: 0.5em;
+  gap: var(--chat-empty-state-gap);
+
+  svg {
+    width: 2rem;
+    height: 2rem;
+    color: var(--stl-color-foreground);
+  }
+  h2 {
+    color: var(--stl-color-foreground);
+    font-size: var(--stl-typography-scale-xl);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+  }
+  h3 {
+    margin-top: 0.5em;
+    font-size: var(--stl-typography-scale-sm);
+    color: var(--stl-color-foreground-muted);
+    font-weight: 400;
+  }
+  ul {
+    list-style-type: none;
+    padding-left: 0;
+    display: flex;
+    flex-direction: column;
+    font-weight: 500;
+    margin-block: calc(-1 * var(--chat-empty-state-gap) / 2);
+
+    .chat-example button {
+      background-color: transparent;
+      border: none;
+      padding-inline: 0;
+      color: inherit;
+      cursor: pointer;
+
+      padding-block: calc(var(--chat-empty-state-gap) / 2);
+      display: flex;
+      gap: 0.35rem;
+      align-items: center;
+      &:hover {
+        text-decoration: underline;
+      }
+      svg {
+        width: 1.1em;
+        height: 1.1em;
+      }
+    }
+  }
+}
+.controls + .chat-empty-state {
+  padding-top: 0;
+  margin-top: -1em;
+  z-index: 3;
+  pointer-events: none;
+  & > * {
+    pointer-events: all;
+  }
+}
+
+.message-log {
+  padding: 0;
+  list-style-type: none;
+  position: relative;
+  z-index: 1;
+
+  flex: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  width: 100%;
+
+  &:not(:has(.chat-message)) {
+    display: none;
+  }
+}
+
+.chat-message {
+  list-style-type: none;
+  text-wrap: pretty;
+  font-size: 15px;
+  line-height: 1.4;
+
+  &[data-message-role='user'] {
+    max-width: 85%;
+    align-self: flex-end;
+    padding: 0.5em 0.75em;
+    background-color: var(--stl-color-accent-inverse-background);
+    color: var(--stl-color-accent-inverse-foreground);
+    overflow: clip;
+
+    ::selection {
+      background-color: rgb(from var(--stl-color-accent-inverse-foreground) r g b / 0.25);
+    }
+  }
+
+  &[data-message-role='assistant'] {
+    align-self: stretch;
+    padding: 0.25em 0;
+    color: var(--stl-color-foreground-reduced);
+  }
+
+  &[data-message-role='error'] {
+    align-self: stretch;
+    padding: 0.5em 0.75em;
+    color: var(--stl-color-red-foreground);
+    border: 1px solid var(--stl-color-red-border);
+  }
+
+  pre {
+    padding: 0.25em 0.65em;
+    font-size: var(--stl-typography-scale-sm);
+    line-height: 1.5;
+  }
+
+  &.tool-use {
+    color: var(--stl-color-foreground-muted);
+    opacity: 0.8;
+
+    strong,
+    em {
+      font-weight: 500;
+      color: var(--stl-color-foreground-reduced);
+    }
+
+    & + .tool-use {
+      margin-top: -0.75em;
+    }
+  }
+}
+
+.chat-message .shimmer-letter {
+  animation: letter-shimmer 1s linear infinite alternate;
+  animation-fill-mode: both;
+  --stagger: 0.05s;
+  animation-delay: calc(var(--i) * var(--stagger));
+}
+@keyframes letter-shimmer {
+  from {
+    opacity: 0.35;
+  }
+  80% {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.chat-message .message-loader {
+  display: inline-block;
+  vertical-align: -0.1em;
+  width: 0.9em;
+  height: 0.9em;
+  color: var(--stl-color-foreground-muted);
+  margin-left: 0.75ch;
+  /* safari plays the rotation off-axis at some scales when applied to the svg, but can apply it without error to the path */
+  path {
+    animation: load-spin 0.8s infinite cubic-bezier(0.5, 0.25, 0.5, 0.75);
+    transform-origin: center;
+  }
+}
+@keyframes load-spin {
+  from {
+    rotate: 0turn;
+  }
+  to {
+    rotate: 1turn;
+  }
+}
+
+.feedback-buttons,
+.controls {
+  display: flex;
+  gap: 0.15rem;
+
+  button:global(.stl-ui-button.stl-ui-button--ghost) {
+    svg {
+      opacity: var(--stl-opacity-level-040);
+      /* if toggle buttons change icons on click, the clicked icon will be removed from the DOM and
+       * cause e.target checks to false-negative.
+       * better to ensure e.target is the button, not its icon child */
+      pointer-events: none;
+    }
+    &:hover,
+    &.active {
+      svg {
+        opacity: var(--stl-opacity-level-080);
+      }
+    }
+  }
+}
+.feedback-buttons {
+  margin-top: -0.25rem;
+}
+.controls {
+  justify-content: flex-end;
+  /* stick to top of container */
+  margin: calc(-1 * var(--chat-area-padding));
+  margin-bottom: 0;
+  padding-inline: var(--chat-area-padding);
+  padding-block: 0.5em;
+  position: sticky;
+  top: calc(-1 * var(--chat-area-padding));
+  z-index: 4;
+  /* mostly-opaque background - pseudo element because color-matching partial transparency is
+   * awkward with the variables so element-level `opacity` is preferable */
+  backdrop-filter: blur(8px);
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-color: var(--stl-color-background);
+    background-image: linear-gradient(to bottom, var(--chat-background-color), var(--chat-background-color));
+    opacity: 0.85;
+    z-index: -1;
+    /* Get a bottom border on scroll */
+    animation-name: controls-bottom-border;
+    animation-duration: 1ms;
+    animation-timeline: scroll(block nearest);
+    animation-range: 0 1.5em;
+    animation-fill-mode: both;
+  }
+}
+/* in column-reverse (when the container scrolls up from the bottom), the border needs to disappear
+ * at the *end* of the scroll timeline, rather than appearing at the beginning. */
+.chat-area:global(.scrolls-up) .controls::before {
+  animation-direction: reverse;
+  animation-range: calc(100% - 1.5em) 100%;
+}
+@keyframes controls-bottom-border {
+  from {
+    box-shadow: inset 0 -1px 0 0 transparent;
+  }
+  to {
+    box-shadow: inset 0 -1px 0 0 var(--stl-color-border-faint);
+  }
+}
+.presentation-panel .controls {
+  padding-top: 1em;
+}
+
+.chat-table {
+  overflow: auto;
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+
+    thead tr {
+      border-bottom: 1px solid var(--stl-color-border-strong);
+    }
+
+    tbody td {
+      border-bottom: 1px solid var(--stl-color-border);
+    }
+
+    th,
+    td {
+      padding: 8px;
+      text-align: left;
+
+      &:first-child {
+        padding-left: 0;
+      }
+
+      &:last-child {
+        padding-right: 0;
+      }
+    }
+
+    th {
+      white-space: nowrap;
+      padding-top: 0;
+      font-weight: 500;
+      color: var(--stl-color-foreground);
+    }
+
+    td {
+      color: var(--stl-color-foreground-reduced);
+      line-height: 1.5;
+    }
+  }
+}

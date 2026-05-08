@@ -1,0 +1,72 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema-jsonc.json",
+  "workspaces": {
+    ".": {},
+    "packages/ai-chat": {},
+    "packages/docs-ai-chat": {},
+    "packages/docs-search": {
+      "entry": [
+        "src/{index,cli,main}.{js,cjs,mjs,jsx,ts,cts,mts,tsx}",
+        "scripts/*.{js,cjs,mjs,jsx,ts,cts,mts,tsx}",
+      ],
+    },
+    "packages/docs-ui": {
+      "entry": ["scripts/*.ts"],
+    },
+    "packages/eslint-config": {},
+    "packages/sdk-json": {
+      "entry": ["shims/entry.ts"],
+      "ignore": [
+        // Shims are loaded via rollup aliases, not imports
+        "shims/config.ts",
+        "shims/sdk-wrappers.ts",
+        "shims/type-fest.ts",
+        // Vendored worker + readme templates loaded at runtime by spec/worker.ts
+        "vendor/**",
+      ],
+      // @pkg/* are internal Stainless packages resolved by rollup aliases
+      "ignoreDependencies": ["@pkg/.*"],
+    },
+    "packages/stl-starlight": {
+      "entry": [
+        "plugin/routes/Docs.astro",
+        "plugin/routes/DocsStatic.astro",
+        "plugin/routes/markdown.ts",
+        "plugin/routes/Overview.astro",
+        "plugin/routes/llms.ts",
+        // Loaded via <script src> in Astro routes (knip's Astro compiler
+        // only extracts inline script bodies, not src attributes)
+        "plugin/globalJs/navigation.ts",
+        "plugin/globalJs/copy.ts",
+        "plugin/globalJs/tooltip.ts",
+        "plugin/globalJs/code-snippets.ts",
+        "plugin/globalJs/method-descriptions.ts",
+        "plugin/globalJs/summary-selection-tweak.ts",
+        // Loaded as virtual module strings in plugin/index.ts
+        "stl-docs/tabsMiddleware.ts",
+        // Loaded as astro middlewares via resolveSrcFile
+        "plugin/replaceSidebarPlaceholderMiddleware.ts",
+        "stl-docs/proseMarkdown/proseMarkdownMiddleware.ts",
+        // Loaded via starlight component overrides through resolveSrcFile
+        "stl-docs/components/TwoColumnContent.astro",
+        "stl-docs/components/Header.astro",
+        "stl-docs/components/ThemeProvider.astro",
+        "stl-docs/components/ThemeSelect.astro",
+        "stl-docs/components/sidebars/BaseSidebar.astro",
+        "stl-docs/components/ContentPanel.astro",
+        "stl-docs/components/PageSidebar.astro",
+        "stl-docs/components/TableOfContents.astro",
+        "stl-docs/components/sidebars/SDKSelectSidebar.astro",
+        "plugin/components/search/Search.astro",
+        // OG image routes loaded via resolveSrcFile
+        "stl-docs/og-image/routes/add-og-image.ts",
+        "stl-docs/og-image/routes/get-api-reference-og-image.ts",
+        "stl-docs/og-image/routes/get-og-image.ts",
+      ],
+    },
+    "apps/dev-stl-docs": { "ignoreDependencies": ["@astrojs/react"], "entry": ["src/ai-chat-handler.ts"] },
+    "apps/ui-playground": { "ignoreDependencies": ["@astrojs/react"] },
+    "apps/dev-docs": { "ignoreDependencies": ["@astrojs/react"] },
+    "apps/dev-simple-plugin-usage": { "ignoreDependencies": ["@astrojs/react"] },
+  },
+}

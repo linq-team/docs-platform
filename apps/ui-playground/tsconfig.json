@@ -1,0 +1,8 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "include": [".astro/types.d.ts", "**/*", "*.config*"],
+  "exclude": ["dist", "public"],
+  "mdx": {
+    "checkMdx": true
+  }
+}

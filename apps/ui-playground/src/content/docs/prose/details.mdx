@@ -1,0 +1,145 @@
+---
+title: Details / Accordion
+description: Accordion examples
+---
+
+import { Accordion } from '@stainless-api/docs/components';
+
+
+## Plain accordions
+
+
+<Accordion>
+  <Accordion.Summary>Example Accordion</Accordion.Summary>
+
+  This is some example content inside the details element. It is hidden by default and will be shown
+  when the summary is clicked.
+
+  This is a second paragraph that’s farther away from the first paragraph than the summary is.
+</Accordion>
+
+
+<Accordion open>
+  <Accordion.Summary>Example Accordion (Open by Default)</Accordion.Summary>
+
+  This is some example content inside the details element. It is visible by default because the
+  details element has the "open" attribute.
+</Accordion>
+
+
+<Accordion>
+  <Accordion.Summary>Example accordion that has such a long title that it extends to multiple lines. It even has a second sentence</Accordion.Summary>
+
+  This is some example content inside the details element. It is hidden by default and will be shown
+  when the summary is clicked.
+</Accordion>
+
+
+<Accordion>
+  <Accordion.Summary>Example **accordion** that contains multiple elements in its `<details>` (for inline styles). They *shouldn’t* need to be wrapped in another element by the user in order to display correctly.</Accordion.Summary>
+
+  ### Introduction
+
+  This is some example content inside the details element. It is hidden by default and will be shown
+  when the summary is clicked.
+
+  ### More markdown content
+  1. First item
+  2. Second item
+  3. Third item
+</Accordion>
+
+
+<Accordion>
+  <Accordion.Summary>
+    Example **accordion** that contains...
+
+    more than one paragraph in its summary??
+  </Accordion.Summary>
+
+  This is some example content inside the details element. It is hidden by default and will be shown
+  when the summary is clicked.
+
+  This is a second paragraph within the details content.
+</Accordion>
+
+
+## Groups (`DetailsGroup`)
+
+
+<Accordion.Group>
+  <Accordion>
+    <Accordion.Summary>First Accordion in Group</Accordion.Summary>
+
+    This is some example content inside the first details element in the group.
+  </Accordion>
+
+  <Accordion open>
+    <Accordion.Summary>Second Accordion in Group</Accordion.Summary>
+
+    This is some example content inside the second details element in the group.
+  </Accordion>
+
+  <Accordion>
+    <Accordion.Summary>Third Accordion in Group</Accordion.Summary>
+
+    This is some example content inside the third details element in the group.
+  </Accordion>
+</Accordion.Group>
+
+
+<Accordion.Group>
+  <Accordion name="group-2">
+    <Accordion.Summary>First Accordion in Exclusive Group</Accordion.Summary>
+
+    This is some example content inside the first details element in the group.
+  </Accordion>
+
+  <Accordion open name="group-2">
+    <Accordion.Summary>Second Accordion in Exclusive Group</Accordion.Summary>
+
+    This is some example content inside the second details element in the group.
+  </Accordion>
+
+  <Accordion name="group-2">
+    <Accordion.Summary>Third Accordion in Exclusive Group</Accordion.Summary>
+
+    This is some example content inside the third details element in the group.
+  </Accordion>
+</Accordion.Group>
+
+
+## Nested accordions
+
+
+<Accordion>
+  <Accordion.Summary>Outer Accordion</Accordion.Summary>
+
+  This is some example content inside the outer details element.
+
+  <Accordion>
+    <Accordion.Summary>Inner Accordion</Accordion.Summary>
+
+    This is some example content inside the inner details element.
+  </Accordion>
+</Accordion>
+
+<Accordion>
+  <Accordion.Summary>Outer Accordion</Accordion.Summary>
+
+  This is some example content inside the outer details element.
+
+  <Accordion.Group>
+    <Accordion>
+      <Accordion.Summary>First Inner Accordion in Group</Accordion.Summary>
+
+      This is some example content inside the first inner details element in the group.
+    </Accordion>
+
+    <Accordion>
+      <Accordion.Summary>Second Inner Accordion in Group</Accordion.Summary>
+
+      This is some example content inside the second inner details element in the group.
+    </Accordion>
+  </Accordion.Group>
+</Accordion>

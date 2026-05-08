@@ -1,0 +1,106 @@
+{
+  "name": "@stainless-api/docs-ui",
+  "private": false,
+  "version": "1.0.0-beta.96",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "clean": "rm -rf dist",
+    "lint": "eslint --flag unstable_native_nodejs_ts_config .",
+    "check:types": "tsc --noEmit",
+    "prepack": "npm run clean && TURBO_UI=0 turbo build && cp package.json package.json.bak && node --experimental-strip-types ../../scripts/remove-development-condition-prepack.ts",
+    "postpack": "mv package.json.bak package.json"
+  },
+  "peerDependencies": {
+    "react": ">=19.0.0",
+    "react-dom": ">=19.0.0"
+  },
+  "dependencies": {
+    "@markdoc/markdoc": "^0.5.7",
+    "@stainless-api/ui-primitives": "workspace:*",
+    "clsx": "catalog:",
+    "htmlparser2": "^12.0.0",
+    "lucide-react": "catalog:"
+  },
+  "devDependencies": {
+    "@stainless/eslint-config": "workspace:*",
+    "@stainless/sdk-json": "latest",
+    "@tsdown/css": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "tsdown": "catalog:",
+    "typescript": "catalog:"
+  },
+  "exports": {
+    ".": {
+      "development": "./src/index.ts",
+      "default": "./dist/index.js"
+    },
+    "./routing": {
+      "development": "./src/routing.ts",
+      "default": "./dist/routing.js"
+    },
+    "./utils": {
+      "development": "./src/utils.ts",
+      "default": "./dist/utils.js"
+    },
+    "./components": {
+      "development": "./src/components/index.ts",
+      "default": "./dist/components/index.js"
+    },
+    "./components/*": {
+      "development": "./src/components/*.tsx",
+      "default": "./dist/components/*.js"
+    },
+    "./languages": {
+      "development": "./src/languages/index.ts",
+      "default": "./dist/languages/index.js"
+    },
+    "./languages/*": {
+      "development": "./src/languages/*.tsx",
+      "default": "./dist/languages/*.js"
+    },
+    "./contexts": {
+      "development": "./src/contexts/index.tsx",
+      "default": "./dist/contexts/index.js"
+    },
+    "./contexts/*": {
+      "development": "./src/contexts/*.tsx",
+      "default": "./dist/contexts/*.js"
+    },
+    "./style": {
+      "development": "./src/style.ts",
+      "default": "./dist/style.js"
+    },
+    "./styles/*": {
+      "development": "./src/styles/*",
+      "default": "./dist/styles/*"
+    },
+    "./styles.css": {
+      "development": "./src/styles.css",
+      "default": "./dist/styles.css"
+    },
+    "./markdown": {
+      "development": "./src/markdown/index.ts",
+      "default": "./dist/markdown/index.js"
+    },
+    "./markdown/*": {
+      "development": "./src/markdown/*.ts",
+      "default": "./dist/markdown/*.js"
+    },
+    "./spec": {
+      "development": "./src/spec.ts",
+      "default": "./dist/spec.js"
+    }
+  }
+}

@@ -1,0 +1,41 @@
+---
+import { Dropdown } from '@stainless-api/docs/components';
+import { ChevronsUpDownIcon, Plus } from 'lucide-react';
+---
+
+<Dropdown id="dropdown-example">
+  <Dropdown.Trigger>
+    <Dropdown.TriggerSelectedItem>This is an option</Dropdown.TriggerSelectedItem>
+    <Dropdown.TriggerIcon>
+      <ChevronsUpDownIcon size={16} />
+    </Dropdown.TriggerIcon>
+  </Dropdown.Trigger>
+  <Dropdown.Menu>
+    <Dropdown.MenuItem value="item-1">
+      <Dropdown.Icon><Plus size={16} /></Dropdown.Icon>
+      <Dropdown.MenuItemText>This is an option</Dropdown.MenuItemText>
+      <Dropdown.MenuItemTemplate> This is an option </Dropdown.MenuItemTemplate>
+    </Dropdown.MenuItem>
+    <Dropdown.MenuItem value="item-2">
+      <Dropdown.Icon><Plus size={16} /></Dropdown.Icon>
+      <Dropdown.MenuItemText>And so is this</Dropdown.MenuItemText>
+      <Dropdown.MenuItemTemplate> And so is this </Dropdown.MenuItemTemplate>
+    </Dropdown.MenuItem>
+    <Dropdown.MenuItem value="item-3">
+      <Dropdown.Icon><Plus size={16} /></Dropdown.Icon>
+      <Dropdown.MenuItemText>And this is as well</Dropdown.MenuItemText>
+      <Dropdown.MenuItemTemplate> And this is as well </Dropdown.MenuItemTemplate>
+    </Dropdown.MenuItem>
+  </Dropdown.Menu>
+</Dropdown>
+
+<script>
+  import { initDropdown } from '@stainless-api/docs/components/scripts';
+
+  document.addEventListener('DOMContentLoaded', () => {
+    initDropdown({
+      root: document.getElementById('dropdown-example'),
+      onSelect: (value) => alert(`Selected: ${value}`),
+    });
+  });
+</script>
