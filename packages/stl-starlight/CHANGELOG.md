@@ -1,5 +1,37 @@
 # @stainless-api/docs
 
+## 1.0.0-beta.143
+
+### Minor Changes
+
+- d358f02: Bugfix
+- d358f02: Bug fixes + new API to override package versions etc.
+
+## 1.0.0-beta.142
+
+### Minor Changes
+
+- 28bb924: updated API for SDKJSON
+
+### Patch Changes
+
+- 65c8fa0: Uses CSS for sidebar http icons instead of inline svg
+- Updated dependencies [65c8fa0]
+- Updated dependencies [28bb924]
+  - @stainless-api/docs-ui@1.0.0-beta.98
+  - @stainless-api/docs-search@1.0.0-beta.52
+
+## 1.0.0-beta.141
+
+### Patch Changes
+
+- 7342172: Link to github on NPM packages
+- af05941: Bump pnpm to 11
+- Updated dependencies [7342172]
+  - @stainless-api/ui-primitives@1.0.0-beta.55
+  - @stainless-api/docs-search@1.0.0-beta.51
+  - @stainless-api/docs-ui@1.0.0-beta.97
+
 ## 1.0.0-beta.140
 
 ### Major Changes

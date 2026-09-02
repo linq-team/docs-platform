@@ -54,13 +54,39 @@ import { ChevronsUpDownIcon } from 'lucide-react';
 import { MethodDescription } from '../components/MethodDescription';
 
 export function buildPageNavigation(resource: SDKJSON.Resource, depth: number = 2): MarkdownHeading[] {
-  const output: MarkdownHeading[] = [{ depth, slug: resource.stainlessPath, text: resource.title }];
+  // The resource's own entry points at the top of the page: nothing renders an
+  // element with the bare `(resource) <name>` id, so using stainlessPath here
+  // produced a dead link on every resource page.
+  const output: MarkdownHeading[] = [{ depth, slug: '_top', text: resource.title }];
+
+  // Models render on the resource page with their own anchors, so they belong
+  // in the on-this-page nav. Without them a resource whose content is mostly
+  // models (Webhooks has 44) renders a TOC with a single entry and reads as an
+  // unnavigable wall.
+  //
+  // The rendered anchor is the model's stainlessPath plus a " > (schema)"
+  // segment — the id sits on the schema block, not on a heading for the model
+  // itself. Methods are deliberately absent: they are rendered without any
+  // anchor at all (verified across resource pages), so linking to them would
+  // produce dead TOC entries.
+  const MODEL_ANCHOR_SUFFIX = ' > (schema)';
+
+  const models = Object.values(resource.models ?? {})
+    // A model with no `oasRef` is synthetic — Stainless generates it for the
+    // `webhook_unwrap` union and renders nothing for it, so a TOC entry would
+    // be a dead link.
+    .filter((model) => !model.isImplicit && "oasRef" in model && model.oasRef)
+    .map((model) => ({
+      depth: depth + 1,
+      slug: `${model.stainlessPath}${MODEL_ANCHOR_SUFFIX}`,
+      text: model.title,
+    }));
 
   const subs = Object.values(resource.subresources ?? {}).flatMap((sub) =>
     buildPageNavigation(sub, depth + 1),
   );
 
-  return [...output, ...subs];
+  return [...output, ...models, ...subs];
 }
 
 export function SDKSelectReactComponent({
@@ -128,7 +154,6 @@ export type SpecMetadata = [
   {
     repo_url?: string;
     code_url?: string;
-    package_title?: string;
     version?: string;
     install?: string;
   },

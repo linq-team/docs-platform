@@ -39,6 +39,7 @@ import { buildAlgoliaIndex } from './buildAlgoliaIndex';
 import { flatSpecsList, loadAllSpecs, LoadedSpecs } from './specs/utils';
 
 export { generateAPILink } from './generateAPIReferenceLink';
+export { fileSystemSDKJSONLoader } from './specs/fileSystemSDKJSONLoader';
 export type { ReferenceSidebarConfigItem };
 
 config({
@@ -124,7 +125,7 @@ function stlStarlightAstroIntegration(pluginConfig: NormalizedStainlessStarlight
         astroBase = astroConfig.base;
 
         specsPromise = loadAllSpecs(
-          pluginConfig.loadSpecs({
+          pluginConfig.loadSDKJSONFiles({
             stainlessProject: pluginConfig.stainlessProject,
             branch: pluginConfig.branch,
             apiKey: pluginConfig.apiKey?.value ?? null,

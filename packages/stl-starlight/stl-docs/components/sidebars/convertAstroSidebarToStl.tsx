@@ -1,9 +1,7 @@
 import { StlSidebarEntry } from '@stainless-api/docs-ui/components';
 import { SidebarEntry } from '../pagination/util';
 import { ReactNode } from 'react';
-import { Badge, getHttpMethod } from '@stainless-api/ui-primitives';
-import { FunctionIcon } from '@stainless-api/ui-primitives/icons';
-import { BracesIcon } from 'lucide-react';
+import { getHttpMethod } from '@stainless-api/ui-primitives';
 
 function getIcon(entry: SidebarEntry): ReactNode | undefined {
   if (entry.type !== 'link') {
@@ -11,25 +9,34 @@ function getIcon(entry: SidebarEntry): ReactNode | undefined {
   }
   const methodAttr = entry.attrs['data-stldocs-method'];
   const httpMethod = getHttpMethod(methodAttr);
+  const classes = `stl-ui-badge stl-ui-badge--size-sm stl-sidebar-icon`;
+
   if (httpMethod) {
-    return <Badge.HTTP method={httpMethod} iconOnly size="sm" />;
+    const methodClass = `stl-ui-badge--http-${httpMethod.toLowerCase()}`;
+    return (
+      <span className={`${classes} stl-ui-badge--http ${methodClass}`} role="img" aria-label={httpMethod} />
+    );
   }
 
   // special handling for the webhooks resource overview page
   if (entry.attrs['data-stldocs-overview'] === 'webhooks') {
     return (
-      <Badge size="sm" icon={<BracesIcon />} intent="info">
-        {''}
-      </Badge>
+      <span
+        className={`${classes} stl-ui-badge--intent-info stl-sidebar-icon--braces`}
+        role="img"
+        aria-label="Webhook"
+      />
     );
   }
 
   // Support empty string as method to show generic "Function" badge
   else if (methodAttr === '') {
     return (
-      <Badge size="sm" icon={<FunctionIcon />} intent="info">
-        {''}
-      </Badge>
+      <span
+        className={`${classes} stl-ui-badge--intent-info stl-sidebar-icon--function`}
+        role="img"
+        aria-label="Method"
+      />
     );
   }
   return undefined;
