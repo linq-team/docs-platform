@@ -1,11 +1,12 @@
 import path from 'path';
-import type { SpecLoaderFn, SpecLoaderParams } from './utils';
+import type { SDKJSONFilesLoaderFn, SDKJSONFilesLoaderParams } from './utils';
+import { sdkJSONCacheReaderWriter } from './utils';
 import Stainless, { APIError } from '@stainless-api/sdk';
-import { DocsLanguage } from '@stainless-api/docs-ui/routing';
+import { DocsLanguage, isSupportedLanguage } from '@stainless-api/docs-ui/routing';
 import { bold } from '../../shared/terminalUtils';
-import { mkdir, readdir, readFile, rm, writeFile } from 'fs/promises';
+import { mkdir, readdir, readFile, rm } from 'fs/promises';
 import { generateSpecFromStrings, previewWorkerCode } from '@stainless/sdk-json/spec';
-import { Spec, SpecLanguage } from '@stainless/sdk-json';
+import { Spec } from '@stainless/sdk-json';
 import crypto from 'crypto';
 
 function resolvePath(inputPath: string) {
@@ -44,7 +45,7 @@ function redactApiKey(apiKey: string) {
     .join('');
 }
 
-async function loadInputs({ apiKey, logger, stainlessProject, branch }: SpecLoaderParams) {
+async function loadInputs({ apiKey, logger, stainlessProject, branch }: SDKJSONFilesLoaderParams) {
   const localFilePaths = getLocalFilePaths();
 
   if (localFilePaths) {
@@ -115,13 +116,11 @@ async function loadInputs({ apiKey, logger, stainlessProject, branch }: SpecLoad
   }
 }
 
-async function maybeLoadJSONFile<T>(filePath: string): Promise<T | null> {
-  try {
-    const fileContents = await readFile(filePath, 'utf8');
-    return JSON.parse(fileContents) as T;
-  } catch {
-    return null;
+function getLanguagesFromSDKJSON(spec: Spec) {
+  if (spec.docs?.languages) {
+    return spec.docs.languages;
   }
+  return Object.keys(spec.decls).filter(isSupportedLanguage);
 }
 
 async function cleanupDirectory(directory: string, filesToKeep: string[]) {
@@ -133,12 +132,12 @@ async function cleanupDirectory(directory: string, filesToKeep: string[]) {
   };
 }
 
-export const defaultSpecLoader: SpecLoaderFn = async (params) => {
+export const defaultSDKJSONLoader: SDKJSONFilesLoaderFn = async (params) => {
   const { createCodegenDir } = params;
 
   const inputs = await loadInputs(params);
 
-  const specsDirectory = path.join(createCodegenDir().pathname, 'specs2');
+  const specsDirectory = path.join(createCodegenDir().pathname, 'sdk_json_cache');
   await mkdir(specsDirectory, { recursive: true });
 
   const fileName =
@@ -150,20 +149,28 @@ export const defaultSpecLoader: SpecLoaderFn = async (params) => {
 
   const filePath = path.join(specsDirectory, fileName);
 
-  const cachedSpec = await maybeLoadJSONFile<{ languages: SpecLanguage[]; sdkJson: Spec }>(filePath);
+  const cachedSpec = await (async () => {
+    try {
+      return await sdkJSONCacheReaderWriter.readFile(filePath);
+    } catch {
+      return null;
+    }
+  })();
+
   // skip generation since we already have a cached spec
   if (cachedSpec) {
+    const languages = getLanguagesFromSDKJSON(cachedSpec);
     params.logger.info(`Loaded cached spec: ${fileName}`);
     return [
       {
         filePath,
-        languages: cachedSpec.languages,
-        sdkJson: cachedSpec.sdkJson,
+        languages,
+        sdkJson: cachedSpec,
       },
     ];
   }
 
-  const result = await generateSpecFromStrings({
+  const { sdkJson } = await generateSpecFromStrings({
     oasStr: inputs.oasStr,
     configStr: inputs.configStr,
     languageOverrides: {
@@ -174,9 +181,11 @@ export const defaultSpecLoader: SpecLoaderFn = async (params) => {
     stainlessProject: params.stainlessProject,
   });
 
-  await writeFile(filePath, JSON.stringify(result), 'utf8');
-  params.logger.info(`Generated: ${fileName}`);
+  const languages = getLanguagesFromSDKJSON(sdkJson);
 
+  await sdkJSONCacheReaderWriter.writeFile(filePath, sdkJson);
+
+  params.logger.info(`Generated: ${fileName}`);
   const { deletedCount } = await cleanupDirectory(specsDirectory, [fileName]);
   if (deletedCount > 0) {
     params.logger.info(`Cleaned up ${deletedCount} unused spec file(s)`);
@@ -185,8 +194,8 @@ export const defaultSpecLoader: SpecLoaderFn = async (params) => {
   return [
     {
       filePath,
-      languages: result.languages.filter((language) => language !== 'sql' && language !== 'openapi'),
-      sdkJson: result.sdkJson,
+      languages,
+      sdkJson,
     },
   ];
 };

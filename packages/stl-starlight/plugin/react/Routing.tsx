@@ -128,7 +128,6 @@ export type SpecMetadata = [
   {
     repo_url?: string;
     code_url?: string;
-    package_title?: string;
     version?: string;
     install?: string;
   },

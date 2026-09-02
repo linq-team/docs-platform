@@ -1,11 +1,11 @@
 import { Spec } from '@stainless/sdk-json';
-import { readFile } from 'fs/promises';
+import { readFile, writeFile } from 'fs/promises';
 import { DocsLanguage } from '@stainless-api/docs-ui/routing';
 import { AstroIntegrationLogger } from 'astro';
 
 type PossibleLanguage = NonNullable<NonNullable<NonNullable<Spec['docs']>['languages']>[number]>;
 
-export type SpecLoaderParams = {
+export type SDKJSONFilesLoaderParams = {
   /**
    * The slug of your Stainless project.
    */
@@ -32,7 +32,7 @@ export type SpecLoaderParams = {
   createCodegenDir: () => URL;
 };
 
-type SpecLoaderResult = {
+type SDKJSONFilesLoaderResult = {
   /**
    * The file path to the loaded spec. The spec MUST be written to a path on disk.
    * If you are not sure where to place it, create a directory in .astro using the `createCodegenDir` function passed in the parameters of the spec loader function.
@@ -49,7 +49,7 @@ type SpecLoaderResult = {
   sdkJson?: Spec;
 };
 
-export type SpecLoaderFn = (opts: SpecLoaderParams) => Promise<SpecLoaderResult[]>;
+export type SDKJSONFilesLoaderFn = (opts: SDKJSONFilesLoaderParams) => Promise<SDKJSONFilesLoaderResult[]>;
 
 async function readSpecFromFile(filePath: string) {
   const txt = await readFile(filePath, 'utf8');
@@ -57,7 +57,7 @@ async function readSpecFromFile(filePath: string) {
   return json;
 }
 
-export async function loadAllSpecs(specLoaderResultsPromise: Promise<SpecLoaderResult[]>) {
+export async function loadAllSpecs(specLoaderResultsPromise: Promise<SDKJSONFilesLoaderResult[]>) {
   const specLoaderResults = await specLoaderResultsPromise;
   const specs = await Promise.all(
     specLoaderResults.map(async (result) => {
@@ -84,3 +84,17 @@ export function flatSpecsList(specs: LoadedSpecs) {
     )
     .flat();
 }
+
+function typedReaderWriter<T>() {
+  return {
+    async readFile(filePath: string) {
+      const fileContents = await readFile(filePath, 'utf8');
+      return JSON.parse(fileContents) as T;
+    },
+    async writeFile(filePath: string, data: T) {
+      await writeFile(filePath, JSON.stringify(data), 'utf8');
+    },
+  };
+}
+
+export const sdkJSONCacheReaderWriter = typedReaderWriter<Spec>();

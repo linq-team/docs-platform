@@ -6,8 +6,8 @@ import type { CreateShikiHighlighterOptions } from '@astrojs/markdown-remark';
 import type { DocsLanguage } from '@stainless-api/docs-ui/routing';
 import type { PropertySettingsType } from '@stainless-api/docs-ui/contexts';
 
-import { defaultSpecLoader } from './specs/defaultSpecLoader';
-import { SpecLoaderFn } from './specs/utils';
+import { defaultSDKJSONLoader } from './specs/defaultSDKJSONLoader';
+import { SDKJSONFilesLoaderFn as SDKJSONFilesLoaderFn } from './specs/utils';
 
 type ApiKeySource = 'explicit-config' | 'environment-variable' | 'cli';
 
@@ -54,7 +54,7 @@ export type StainlessStarlightUserConfig = {
   /**
    * Optional function to provide your own loader for API reference data.
    */
-  loadSpecs?: SpecLoaderFn;
+  loadSDKJSONFiles?: SDKJSONFilesLoaderFn;
 
   /**
    * Optional list of versions to render in the API reference.
@@ -286,7 +286,7 @@ function normalizeConfig(partial: SomeStainlessStarlightUserConfig, astroOptions
       detailThreshold: partial.llmsTxt?.detailThreshold ?? 2000,
     },
     apiKey: loadApiKey(partial.apiKey),
-    loadSpecs: partial.loadSpecs ?? defaultSpecLoader,
+    loadSDKJSONFiles: partial.loadSDKJSONFiles ?? defaultSDKJSONLoader,
     branch: partial.versions?.[0]?.branch ?? 'main',
   };
 
